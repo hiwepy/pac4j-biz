@@ -16,7 +16,6 @@
 package org.pac4j.core.ext.profile;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.function.Function;
 
 import org.pac4j.core.context.WebContext;
@@ -32,8 +31,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AccessTokenProfileDefinition extends TokenProfileDefinition<TokenProfile, AccessToken> {
 	
 	protected static ObjectMapper mapper;
-
-	static {
+	protected final String profileUrl;
+	
+	public AccessTokenProfileDefinition(String profileUrl) {
+		super();
+		this.profileUrl = profileUrl;
 		if (mapper == null) {
 	        mapper = new ObjectMapper();
 	        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
@@ -41,18 +43,11 @@ public class AccessTokenProfileDefinition extends TokenProfileDefinition<TokenPr
 	        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	    }
 	}
-	
-    public AccessTokenProfileDefinition() {
-        super();
-    }
 
-    public AccessTokenProfileDefinition(final Function<Object[], TokenProfile> profileFactory) {
+    public AccessTokenProfileDefinition(String profileUrl, final Function<Object[], TokenProfile> profileFactory) {
         super(profileFactory);
+        this.profileUrl = profileUrl;
     }
-    
-    public Map<String, String> getCustomHeaders(){
-    	return null;
-    };
     
     /**
      * Retrieve the url of the profile of the authenticated user for the provider.
@@ -61,7 +56,7 @@ public class AccessTokenProfileDefinition extends TokenProfileDefinition<TokenPr
      * @return the url of the user profile given by the provider
      */
     public String getProfileUrl(WebContext context, AccessToken accessToken) {
-    	return null;
+    	return profileUrl;
     }
 
     /**

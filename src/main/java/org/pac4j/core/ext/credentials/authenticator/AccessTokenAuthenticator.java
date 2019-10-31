@@ -26,9 +26,15 @@ import org.pac4j.core.ext.profile.TokenProfile;
  */
 public class AccessTokenAuthenticator extends TokenAuthenticator<TokenCredentials, TokenProfile, AccessToken> {
 	
+	private final String profileUrl;
+	
+	public AccessTokenAuthenticator(String profileUrl) {
+		this.profileUrl = profileUrl;
+	}
+	
 	@Override
     protected void internalInit() {
-        defaultProfileDefinition(new AccessTokenProfileDefinition(x -> new TokenProfile()));
+        defaultProfileDefinition(new AccessTokenProfileDefinition(profileUrl, x -> new TokenProfile()));
         super.internalInit();
     }
 	

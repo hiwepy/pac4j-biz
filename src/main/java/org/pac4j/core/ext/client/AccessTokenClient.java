@@ -20,28 +20,46 @@ import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.ext.credentials.authenticator.AccessTokenAuthenticator;
 import org.pac4j.core.ext.profile.creator.TokenProfileCreator;
 import org.pac4j.core.profile.creator.ProfileCreator;
+import org.pac4j.core.util.CommonHelper;
 import org.pac4j.http.client.direct.ParameterClient;
 
 @SuppressWarnings("rawtypes")
 public class AccessTokenClient extends ParameterClient {
-
+	
+	protected String profileUrl;
+	
 	public AccessTokenClient() {
 	}
-
-	public AccessTokenClient(final String parameterName, final Authenticator tokenAuthenticator) {
-		super(parameterName, tokenAuthenticator);
+	
+	public AccessTokenClient(final String profileUrl) {
+		this.profileUrl = profileUrl;
 	}
 
-	public AccessTokenClient(final String parameterName, final Authenticator tokenAuthenticator,
+	public AccessTokenClient(final String profileUrl, final String parameterName, final Authenticator tokenAuthenticator) {
+		super(parameterName, tokenAuthenticator);
+		this.profileUrl = profileUrl;
+	}
+
+	public AccessTokenClient(final String profileUrl, final String parameterName, final Authenticator tokenAuthenticator,
 			final ProfileCreator profileCreator) {
 		super(parameterName, tokenAuthenticator, profileCreator);
+		this.profileUrl = profileUrl;
 	}
-
+	
 	@Override
 	protected void clientInit() {
 		super.clientInit();
-		defaultAuthenticator(new AccessTokenAuthenticator());
+		defaultAuthenticator(new AccessTokenAuthenticator(profileUrl));
 		defaultProfileCreator(new TokenProfileCreator<TokenCredentials>());
+	}
+
+	public String getProfileUrl() {
+		return profileUrl;
+	}
+
+	public void setProfileUrl(String profileUrl) {
+		CommonHelper.assertNotNull("profileUrl", profileUrl);
+		this.profileUrl = profileUrl;
 	}
 	
 }

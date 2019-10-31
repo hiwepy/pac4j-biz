@@ -15,7 +15,6 @@
  */
 package org.pac4j.core.ext.profile;
 
-import java.util.Map;
 import java.util.function.Function;
 
 import org.pac4j.core.context.WebContext;
@@ -35,8 +34,6 @@ public abstract class TokenProfileDefinition<P extends TokenProfile, T extends T
     public TokenProfileDefinition(final Function<Object[], P> profileFactory) {
         super(profileFactory);
     }
-    
-    public abstract Map<String, String> getCustomHeaders();
     
     /**
      * Retrieve the url of the profile of the authenticated user for the provider.
