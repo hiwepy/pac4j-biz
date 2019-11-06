@@ -62,15 +62,18 @@ public class HttpUtils2 {
         return HttpUtils.openConnection(url, HttpConstants.HTTP_METHOD.GET.name(), null);
     }
 	
-	public static HttpURLConnection openGetConnection(final String url, final Map<String, String> params) throws IOException {
-        return HttpUtils.openConnection(new URL(buildURL(url, params)), HttpConstants.HTTP_METHOD.GET.name(), null);
+	public static HttpURLConnection openGetConnection(String url, final Map<String, String> params) throws IOException {
+		url = buildURL(url, params);
+        return HttpUtils.openConnection(new URL(url), HttpConstants.HTTP_METHOD.GET.name(), null);
     }
 
-    public static HttpURLConnection openGetConnection(final String url, final Map<String, String> headers, final Map<String,String> params) throws IOException {
-        return HttpUtils.openConnection(new URL(buildURL(url, params)), HttpConstants.HTTP_METHOD.GET.name(), headers);
+    public static HttpURLConnection openGetConnection(String url, final Map<String, String> headers, final Map<String,String> params) throws IOException {
+    	url = buildURL(url, params);
+        return HttpUtils.openConnection(new URL(url), HttpConstants.HTTP_METHOD.GET.name(), headers);
     }
     
-    public static HttpURLConnection openPostConnection(final String url, final Map<String, String> headers , final Map<String,String> params) throws IOException{
+    public static HttpURLConnection openPostConnection(String url, final Map<String, String> headers , final Map<String,String> params) throws IOException{
+    	url = buildURL(url, params);
 		// 此处的urlConnection对象实际上是根据URL的 请求协议(此处是http)生成的URLConnection类 的子类HttpURLConnection,故此处最好将其转化 为HttpURLConnection类型的对象,以便用到HttpURLConnection更多的API.如下: 
 		HttpURLConnection httpConn = HttpUtils.openPostConnection(new URL(url), headers); 
 		/* 

@@ -52,8 +52,6 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 	protected final String DEFAULT_ACCEPT_HEADER = "application/json, text/plain, */*";
 	
 	private String parameterName;
-	private boolean supportGetRequest;
-	private boolean supportPostRequest;
 	/* Map containing user defined headers */
 	private Map<String, String> customHeaders = new HashMap<>();
     /* Map containing user defined parameters */
@@ -62,10 +60,8 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 	public TokenAuthenticator() {
 	}
 	
-	public TokenAuthenticator(String parameterName, boolean supportGetRequest, boolean supportPostRequest) {
+	public TokenAuthenticator(String parameterName) {
 		this.parameterName = parameterName;
-		this.supportGetRequest = supportGetRequest;
-		this.supportPostRequest = supportPostRequest;
 	}
 	
 	@Override
@@ -149,11 +145,7 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
         	
             signRequest(context, accessToken, profileUrl, getCustomHeaders(), getCustomParams());
             
-        	if (this.isSupportPostRequest()) {
-        		connection = HttpUtils2.openPostConnection(profileUrl, getCustomHeaders(), getCustomParams());
-			} else {
-				connection = HttpUtils2.openGetConnection(profileUrl, getCustomHeaders(), getCustomParams());
-			}
+			connection = HttpUtils2.openGetConnection(profileUrl, getCustomHeaders(), getCustomParams());
             
             int code = connection.getResponseCode();
             final long t1 = System.currentTimeMillis();
@@ -208,22 +200,6 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
          logger.debug("params: {} ", JSONObject.toJSONString(params));
          
     }
-
-	public boolean isSupportGetRequest() {
-		return supportGetRequest;
-	}
-
-	public void setSupportGetRequest(boolean supportGetRequest) {
-		this.supportGetRequest = supportGetRequest;
-	}
-
-	public boolean isSupportPostRequest() {
-		return supportPostRequest;
-	}
-
-	public void setSupportPostRequest(boolean supportPostRequest) {
-		this.supportPostRequest = supportPostRequest;
-	}
 
 	public Map<String, String> getCustomHeaders() {
 		return customHeaders;
