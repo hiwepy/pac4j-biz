@@ -17,7 +17,7 @@ package org.pac4j.core.ext.credentials.authenticator;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,9 +29,11 @@ import org.pac4j.core.exception.CredentialsException;
 import org.pac4j.core.exception.HttpCommunicationException;
 import org.pac4j.core.ext.profile.Token;
 import org.pac4j.core.ext.profile.TokenProfile;
+import org.pac4j.core.ext.profile.TokenProfileDefinition;
 import org.pac4j.core.ext.profile.definition.TokenProfileDefinitionAware;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.util.HttpUtils;
+import org.pac4j.core.util.HttpUtils2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,24 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
 	
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected static final String AUTHORIZATION_PARAM = "token";
-	    
+	private boolean supportGetRequest;
+	private boolean supportPostRequest;
+	/* Map containing user defined headers */
+	private Map<String, String> customHeaders = new HashMap<>();
+    /* Map containing user defined parameters */
+    private Map<String, String> customParams = new HashMap<>();
+		
+    private String charset = Charset.defaultCharset().name();
+    
+    
+	public TokenAuthenticator() {
+	}
+	
+	public TokenAuthenticator(boolean supportGetRequest, boolean supportPostRequest) {
+		this.supportGetRequest = supportGetRequest;
+		this.supportPostRequest = supportPostRequest;
+	}
+	
 	@Override
     protected void internalInit() {
     	ObjectMapper mapper = new ObjectMapper();
@@ -97,9 +116,12 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
     	
     	final T accessToken = getAccessToken(credentials);
     	
-    	logger.debug("accessToken: {}", accessToken);
+    	logger.debug("accessToken: {}", accessToken.getRawResponse());
     	
-        final String profileUrl = getProfileDefinition().getProfileUrl(context, accessToken);
+    	TokenProfileDefinition<U, T> profileDefinition = getProfileDefinition();
+		CommonHelper.assertNotNull("profileDefinition", profileDefinition);
+    	
+        final String profileUrl = profileDefinition.getProfileUrl(context, accessToken);
 
         final String body = callRestApi(context, accessToken, profileUrl);
         logger.debug("body: {}", body);
@@ -122,16 +144,18 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
      */
     protected String callRestApi(final WebContext context, final T accessToken, final String profileUrl) {
     	
-    	logger.debug("accessToken: {} / profileUrl: {}", accessToken, profileUrl);
+    	logger.debug("accessToken: {} / profileUrl: {}", accessToken.getRawResponse(), profileUrl);
         final long t0 = System.currentTimeMillis();
          
-        final Map<String, String> headers = new HashMap<>();
-
         HttpURLConnection connection = null;
         try {
         	
-    		connection = HttpUtils.openPostConnection(new URL(profileUrl), headers);
-            
+        	if (this.isSupportPostRequest()) {
+        		connection = HttpUtils2.openPostConnection(profileUrl, getCustomHeaders(), getCustomParams(), getCharset());
+			} else {
+				connection = HttpUtils2.openGetConnection(profileUrl, getCustomHeaders(), getCustomParams());
+			}
+    		
             signRequest(context, accessToken, connection);
             
             int code = connection.getResponseCode();
@@ -164,5 +188,45 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
      */
     protected void signRequest(final WebContext context,  T token, HttpURLConnection connection) {}
 
+	public boolean isSupportGetRequest() {
+		return supportGetRequest;
+	}
+
+	public void setSupportGetRequest(boolean supportGetRequest) {
+		this.supportGetRequest = supportGetRequest;
+	}
+
+	public boolean isSupportPostRequest() {
+		return supportPostRequest;
+	}
+
+	public void setSupportPostRequest(boolean supportPostRequest) {
+		this.supportPostRequest = supportPostRequest;
+	}
+
+	public Map<String, String> getCustomHeaders() {
+		return customHeaders;
+	}
+
+	public void setCustomHeaders(Map<String, String> customHeaders) {
+		this.customHeaders = customHeaders;
+	}
+
+	public Map<String, String> getCustomParams() {
+		return customParams;
+	}
+
+	public void setCustomParams(Map<String, String> customParams) {
+		this.customParams = customParams;
+	}
+
+	public String getCharset() {
+		return charset;
+	}
+
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
+	
     
 }

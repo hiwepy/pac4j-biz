@@ -15,6 +15,7 @@
  */
 package org.pac4j.core.ext.utils;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.pac4j.core.context.HttpConstants;
@@ -27,6 +28,17 @@ import org.pac4j.core.context.WebContext;
  */
 public class WebUtils {
 
+	public static String buildURL(String baseURL, Map<String, String> paramsMap){
+		if(paramsMap == null){
+			return baseURL;
+		}
+		StringBuilder builder = new StringBuilder(baseURL);
+		for (String key : paramsMap.keySet()) {
+			builder.append(builder.indexOf("?") > 0 ? "&" : "?").append(key).append("=").append(String.valueOf(paramsMap.get(key)));
+		}
+		return builder.toString();
+	}
+	
 	public static boolean isAjaxRequest(WebContext context) {
 		Optional<String> header = context.getRequestHeader(HttpConstants.AJAX_HEADER_NAME);
 		return header.isPresent() ? header.get().contains(HttpConstants.AJAX_HEADER_VALUE) : false;
