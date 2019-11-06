@@ -32,7 +32,7 @@ public abstract class TokenProfileDefinitionAware<P extends TokenProfile, T exte
 		return profileDefinition;
 	}
 
-	public void setProfileDefinitions(final TokenProfileDefinition<P, T> profileDefinition) {
+	public void setProfileDefinition(final TokenProfileDefinition<P, T> profileDefinition) {
 		CommonHelper.assertNotNull("profileDefinition", profileDefinition);
 		this.profileDefinition = profileDefinition;
 	}
