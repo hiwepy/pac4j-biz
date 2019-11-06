@@ -18,7 +18,6 @@ package org.pac4j.core.ext.credentials.authenticator;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -72,7 +71,7 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 	@Override
     protected void internalInit() {
 		CommonHelper.assertNotNull("parameterName", parameterName);
-		CommonHelper.assertNotNull("profileDefinitions", getProfileDefinitions());
+		CommonHelper.assertNotNull("profileDefinition", getProfileDefinition());
     }
 	
 	@Override
@@ -115,27 +114,19 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
     	
     	logger.debug("accessToken: {}", accessToken.getRawResponse());
     	
-    	List<TokenProfileDefinition<P, T>> profileDefinitions = getProfileDefinitions();
-		CommonHelper.assertNotNull("profileDefinitions", profileDefinitions);
-    	
-		for (TokenProfileDefinition<P, T> profileDefinition : profileDefinitions) {
+    	TokenProfileDefinition<P, T> profileDefinition = getProfileDefinition();
+		CommonHelper.assertNotNull("profileDefinition", profileDefinition);
 			
-			if(profileDefinition.matchProfile(context, accessToken)) {
-				
-				final String profileUrl = profileDefinition.getProfileUrl(context, accessToken);
-				
-		        final String body = retrieveUserProfileFromRestApi(context, accessToken, profileUrl);
-		        logger.debug("body: {}", body);
-		        if (body == null) {
-		            throw new HttpCommunicationException("No data found for accessToken: " + accessToken);
-		        }        
-		        final P profile = (P) profileDefinition.extractUserProfile(body);
-		        logger.debug("Authentication success for token: {}", accessToken.getRawResponse());
-		        return Optional.of(profile);
-			}
-		}
+		final String profileUrl = profileDefinition.getProfileUrl(context, accessToken);
 		
-		return Optional.empty();
+        final String body = retrieveUserProfileFromRestApi(context, accessToken, profileUrl);
+        logger.debug("body: {}", body);
+        if (body == null) {
+            throw new HttpCommunicationException("No data found for accessToken: " + accessToken);
+        }        
+        final P profile = (P) profileDefinition.extractUserProfile(body);
+        logger.debug("Authentication success for token: {}", accessToken.getRawResponse());
+        return Optional.of(profile);
     }
     
     /**

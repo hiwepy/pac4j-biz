@@ -15,9 +15,6 @@
  */
 package org.pac4j.core.ext.profile.definition;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.pac4j.core.ext.profile.Token;
 import org.pac4j.core.ext.profile.TokenProfile;
 import org.pac4j.core.ext.profile.TokenProfileDefinition;
@@ -29,21 +26,21 @@ import org.pac4j.core.util.InitializableObject;
  */
 public abstract class TokenProfileDefinitionAware<P extends TokenProfile, T extends Token> extends InitializableObject {
 
-	private List<TokenProfileDefinition<P, T>> profileDefinitions;
+	private TokenProfileDefinition<P, T> profileDefinition;
 	
-	public List<TokenProfileDefinition<P, T>> getProfileDefinitions() {
-		return profileDefinitions;
+	public TokenProfileDefinition<P, T> getProfileDefinition() {
+		return profileDefinition;
 	}
 
-	public void setProfileDefinitions(final List<TokenProfileDefinition<P, T>> profileDefinitions) {
-		CommonHelper.assertNotNull("profileDefinitions", profileDefinitions);
-		this.profileDefinitions = profileDefinitions;
+	public void setProfileDefinitions(final TokenProfileDefinition<P, T> profileDefinition) {
+		CommonHelper.assertNotNull("profileDefinition", profileDefinition);
+		this.profileDefinition = profileDefinition;
 	}
 
 	protected void defaultProfileDefinition(final TokenProfileDefinition<P, T> profileDefinition) {
 		CommonHelper.assertNotNull("profileDefinition", profileDefinition);
-		if (this.profileDefinitions == null) {
-			this.profileDefinitions = Arrays.asList(profileDefinition);
+		if (this.profileDefinition == null) {
+			this.profileDefinition = profileDefinition;
 		}
 	}
 	
