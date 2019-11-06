@@ -22,6 +22,7 @@ import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.TokenCredentials;
 import org.pac4j.core.credentials.extractor.ParameterExtractor;
 import org.pac4j.core.exception.CredentialsException;
+import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +71,12 @@ public class TokenParameterExtractor extends ParameterExtractor {
         }
 
         return Optional.of(new TokenCredentials(value.get()));
+    }
+	
+	@Override
+    public String toString() {
+        return CommonHelper.toNiceString(this.getClass(), "parameterName", parameterName,
+                "supportGetRequest", supportGetRequest, "supportPostRequest", supportPostRequest);
     }
 
 }
