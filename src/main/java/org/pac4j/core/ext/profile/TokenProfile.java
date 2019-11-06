@@ -20,7 +20,7 @@ import org.pac4j.core.profile.CommonProfile;
 
 /**
  * <p>This class is the user profile for token with appropriate getters.</p>
- * <p>It is returned by the {@link org.pac4j.biz.client.AccessTokenClient}.</p>
+ * <p>It is returned by the {@link org.pac4j.biz.client.TokenClient}.</p>
  *
  * @author 		： <a href="https://github.com/vindell">wandl</a>
  */

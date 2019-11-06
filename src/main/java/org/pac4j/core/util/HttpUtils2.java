@@ -19,7 +19,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Map;
 
 import org.pac4j.core.context.HttpConstants;
@@ -71,7 +70,7 @@ public class HttpUtils2 {
         return HttpUtils.openConnection(new URL(buildURL(url, params)), HttpConstants.HTTP_METHOD.GET.name(), headers);
     }
     
-    public static HttpURLConnection openPostConnection(final String url, final Map<String, String> headers , final Map<String,String> params, String charset) throws IOException{
+    public static HttpURLConnection openPostConnection(final String url, final Map<String, String> headers , final Map<String,String> params) throws IOException{
 		// 此处的urlConnection对象实际上是根据URL的 请求协议(此处是http)生成的URLConnection类 的子类HttpURLConnection,故此处最好将其转化 为HttpURLConnection类型的对象,以便用到HttpURLConnection更多的API.如下: 
 		HttpURLConnection httpConn = HttpUtils.openPostConnection(new URL(url), headers); 
 		/* 
@@ -89,13 +88,13 @@ public class HttpUtils2 {
     	//组织参数内容
 		StringBuilder paramsBuilder = new StringBuilder();
 		boolean isfirst = true;
-		for (String key : params.keySet()) {
+		for (String paramName : params.keySet()) {
 			// 正文，正文内容其实跟get的URL中 '? '后的参数字符串一致
 			if(isfirst) {
-				paramsBuilder.append(key).append("=").append(URLEncoder.encode(String.valueOf(params.get(key)), charset));					
+				paramsBuilder.append(HttpUtils.encodeQueryParam(paramName, String.valueOf(params.get(paramName))));					
 				isfirst = false;
 			}else {
-				paramsBuilder.append("&").append(key).append("=").append(URLEncoder.encode(String.valueOf(params.get(key)), charset));	
+				paramsBuilder.append("&").append(HttpUtils.encodeQueryParam(paramName, String.valueOf(params.get(paramName))));	
 			}
 		}
 		

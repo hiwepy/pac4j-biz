@@ -15,6 +15,9 @@
  */
 package org.pac4j.core.ext.credentials.extractor;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.pac4j.core.context.ContextHelper;
@@ -38,6 +41,8 @@ public class TokenParameterExtractor extends ParameterExtractor {
 
     private boolean supportPostRequest;
     
+    private String charset = StandardCharsets.UTF_8.name();
+    
 	public TokenParameterExtractor(String parameterName) {
 		this(parameterName, false, true);
 	}
@@ -48,6 +53,15 @@ public class TokenParameterExtractor extends ParameterExtractor {
         this.supportGetRequest = supportGetRequest;
         this.supportPostRequest = supportPostRequest;
 	}
+	
+	public TokenParameterExtractor(String parameterName, boolean supportGetRequest, boolean supportPostRequest, String charset) {
+		super(parameterName, supportGetRequest, supportPostRequest);
+		this.parameterName = parameterName;
+        this.supportGetRequest = supportGetRequest;
+        this.supportPostRequest = supportPostRequest;
+        this.charset = charset;
+	}
+	
 	
 	@Override
     public Optional<TokenCredentials> extract(WebContext context) {
@@ -75,13 +89,25 @@ public class TokenParameterExtractor extends ParameterExtractor {
 
         logger.debug("token : {}", value.get());
         
-        return Optional.of(new TokenCredentials(value.get()));
+        try {
+        	  return Optional.of(new TokenCredentials( URLDecoder.decode(value.get(), getCharset())));
+		} catch (UnsupportedEncodingException e) {
+			  return Optional.of(new TokenCredentials(value.get()));
+		}
     }
 	
 	@Override
     public String toString() {
         return CommonHelper.toNiceString(this.getClass(), "parameterName", parameterName,
-                "supportGetRequest", supportGetRequest, "supportPostRequest", supportPostRequest);
+                "supportGetRequest", supportGetRequest, "supportPostRequest", supportPostRequest, "charset", charset);
     }
+
+	public String getCharset() {
+		return charset;
+	}
+
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
 
 }

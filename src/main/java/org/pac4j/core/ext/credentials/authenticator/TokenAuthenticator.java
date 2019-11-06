@@ -17,11 +17,12 @@ package org.pac4j.core.ext.credentials.authenticator;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.TokenCredentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
@@ -31,51 +32,47 @@ import org.pac4j.core.ext.profile.Token;
 import org.pac4j.core.ext.profile.TokenProfile;
 import org.pac4j.core.ext.profile.TokenProfileDefinition;
 import org.pac4j.core.ext.profile.definition.TokenProfileDefinitionAware;
+import org.pac4j.core.ext.utils.HttpHeaders;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.util.HttpUtils;
 import org.pac4j.core.util.HttpUtils2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * TODO
  * @author 		： <a href="https://github.com/vindell">vindell</a>
  */
-public abstract class TokenAuthenticator<C extends TokenCredentials, U extends TokenProfile, T extends Token>
-	extends TokenProfileDefinitionAware<U, T>  implements Authenticator<C> {
+public abstract class TokenAuthenticator<C extends TokenCredentials, P extends TokenProfile, T extends Token>
+	extends TokenProfileDefinitionAware<P, T>  implements Authenticator<C> {
 	
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
-	protected static final String AUTHORIZATION_PARAM = "token";
+	protected final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0";
+	protected final String DEFAULT_ACCEPT_HEADER = "application/json, text/plain, */*";
+	
+	private String parameterName;
 	private boolean supportGetRequest;
 	private boolean supportPostRequest;
 	/* Map containing user defined headers */
 	private Map<String, String> customHeaders = new HashMap<>();
     /* Map containing user defined parameters */
     private Map<String, String> customParams = new HashMap<>();
-		
-    private String charset = Charset.defaultCharset().name();
-    
     
 	public TokenAuthenticator() {
 	}
 	
-	public TokenAuthenticator(boolean supportGetRequest, boolean supportPostRequest) {
+	public TokenAuthenticator(String parameterName, boolean supportGetRequest, boolean supportPostRequest) {
+		this.parameterName = parameterName;
 		this.supportGetRequest = supportGetRequest;
 		this.supportPostRequest = supportPostRequest;
 	}
 	
 	@Override
     protected void internalInit() {
-    	ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        defaultObjectMapper(mapper);
-        
+		CommonHelper.assertNotNull("parameterName", parameterName);
+		CommonHelper.assertNotNull("profileDefinitions", getProfileDefinitions());
     }
 	
 	@Override
@@ -90,7 +87,7 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
             throw new CredentialsException("Token cannot be blank");
         }
         
-        final Optional<U> profile = retrieveUserProfileFromToken(context , credentials);
+        final Optional<P> profile = retrieveUserProfileFromToken(context , credentials);
         
         logger.debug("profile: {}", profile.get());
         credentials.setUserProfile(profile.get());
@@ -98,13 +95,13 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
     }
 	
 	/**
-     * Get the access token from OAuth credentials.
+     * Get the access token from Auth credentials.
      *
      * @param credentials credentials
      * @return the access token
      */
     protected abstract T getAccessToken(final C credentials);
-
+    
     /**
      * Retrieve the user profile from the access token.
      *
@@ -112,24 +109,33 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
      * @param accessToken the access token
      * @return the user profile
      */
-    protected Optional<U> retrieveUserProfileFromToken(final WebContext context, final C credentials) {
+    protected Optional<P> retrieveUserProfileFromToken(final WebContext context, final C credentials) {
     	
     	final T accessToken = getAccessToken(credentials);
     	
     	logger.debug("accessToken: {}", accessToken.getRawResponse());
     	
-    	TokenProfileDefinition<U, T> profileDefinition = getProfileDefinition();
-		CommonHelper.assertNotNull("profileDefinition", profileDefinition);
+    	List<TokenProfileDefinition<P, T>> profileDefinitions = getProfileDefinitions();
+		CommonHelper.assertNotNull("profileDefinitions", profileDefinitions);
     	
-        final String profileUrl = profileDefinition.getProfileUrl(context, accessToken);
-
-        final String body = callRestApi(context, accessToken, profileUrl);
-        logger.debug("body: {}", body);
-        if (body == null) {
-            throw new HttpCommunicationException("No data found for accessToken: " + accessToken);
-        }        
-        final U profile = (U) getProfileDefinition().extractUserProfile(body);
-        return Optional.of(profile);
+		for (TokenProfileDefinition<P, T> profileDefinition : profileDefinitions) {
+			
+			if(profileDefinition.matchProfile(context, accessToken)) {
+				
+				final String profileUrl = profileDefinition.getProfileUrl(context, accessToken);
+				
+		        final String body = retrieveUserProfileFromRestApi(context, accessToken, profileUrl);
+		        logger.debug("body: {}", body);
+		        if (body == null) {
+		            throw new HttpCommunicationException("No data found for accessToken: " + accessToken);
+		        }        
+		        final P profile = (P) profileDefinition.extractUserProfile(body);
+		        logger.debug("Authentication success for token: {}", accessToken.getRawResponse());
+		        return Optional.of(profile);
+			}
+		}
+		
+		return Optional.empty();
     }
     
     /**
@@ -142,7 +148,7 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
      * @param verb        method used to request data
      * @return the response body
      */
-    protected String callRestApi(final WebContext context, final T accessToken, final String profileUrl) {
+    protected String retrieveUserProfileFromRestApi(final WebContext context, final T accessToken, final String profileUrl) {
     	
     	logger.debug("accessToken: {} / profileUrl: {}", accessToken.getRawResponse(), profileUrl);
         final long t0 = System.currentTimeMillis();
@@ -150,20 +156,18 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
         HttpURLConnection connection = null;
         try {
         	
+            signRequest(context, accessToken, profileUrl, getCustomHeaders(), getCustomParams());
+            
         	if (this.isSupportPostRequest()) {
-        		connection = HttpUtils2.openPostConnection(profileUrl, getCustomHeaders(), getCustomParams(), getCharset());
+        		connection = HttpUtils2.openPostConnection(profileUrl, getCustomHeaders(), getCustomParams());
 			} else {
 				connection = HttpUtils2.openGetConnection(profileUrl, getCustomHeaders(), getCustomParams());
 			}
-    		
-            signRequest(context, accessToken, connection);
             
             int code = connection.getResponseCode();
             final long t1 = System.currentTimeMillis();
             logger.debug("Request took: " + (t1 - t0) + " ms for: " + profileUrl);
-            
             if (code == 200) {
-                logger.debug("Authentication success for token: {}", accessToken.getRawResponse());
                 return HttpUtils.readBody(connection);
             } else if (code == 401 || code == 403) {
                 logger.info("Authentication failure for token: {} -> {}", accessToken.getRawResponse(), HttpUtils.buildHttpErrorMessage(connection));
@@ -179,14 +183,40 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
         }
     }
 
-    /**
+	/**
      * Sign the request.
      *
      * @param service the service
      * @param token the token
      * @param request the request
      */
-    protected void signRequest(final WebContext context,  T token, HttpURLConnection connection) {}
+    protected void signRequest(final WebContext context,final T token, final String url, final Map<String, String> headers , final Map<String,String> params) {
+    	
+         /* 
+  		 * 配置本次连接的Content-type，配置为application/x-www-form-urlencoded的 意思是正文是urlencoded编码过的form参数，下面我们可以看到我们对正文内容使用URLEncoder.encode进行编码
+  		 */	
+         if(!headers.containsKey(HttpConstants.CONTENT_TYPE_HEADER)) {
+        	 headers.put( HttpConstants.CONTENT_TYPE_HEADER, HttpConstants.APPLICATION_FORM_ENCODED_HEADER_VALUE);
+         }
+         // 设置通用的请求属性 (模拟浏览器请求头) 
+         if(!headers.containsKey(HttpConstants.ACCEPT_HEADER)) {
+        	 headers.put( HttpConstants.ACCEPT_HEADER, context.getRequestHeader(HttpConstants.ACCEPT_HEADER).orElse(DEFAULT_ACCEPT_HEADER)); 
+         }
+         if(!headers.containsKey(HttpHeaders.USER_AGENT)) {
+        	 headers.put(HttpHeaders.USER_AGENT, context.getRequestHeader(HttpHeaders.USER_AGENT).orElse(DEFAULT_USER_AGENT));
+         }
+         // 拷贝本次请求的参数到新请求中
+         for (String paramName : context.getRequestParameters().keySet()) {
+        	 if(!params.containsKey(paramName)) {
+        		 params.put(paramName, context.getRequestParameter(paramName).orElse(""));
+        	 }
+         }
+         params.put(getParameterName(), token.getRawResponse());
+         
+         logger.debug("headers: {} ", JSONObject.toJSONString(headers));
+         logger.debug("params: {} ", JSONObject.toJSONString(params));
+         
+    }
 
 	public boolean isSupportGetRequest() {
 		return supportGetRequest;
@@ -220,13 +250,11 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
 		this.customParams = customParams;
 	}
 
-	public String getCharset() {
-		return charset;
+	public String getParameterName() {
+		return parameterName;
 	}
 
-	public void setCharset(String charset) {
-		this.charset = charset;
+	public void setParameterName(String parameterName) {
+		this.parameterName = parameterName;
 	}
-	
-    
 }

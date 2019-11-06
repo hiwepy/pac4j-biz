@@ -16,52 +16,36 @@
 package org.pac4j.core.ext.client;
 
 import org.pac4j.core.credentials.TokenCredentials;
-import org.pac4j.core.credentials.authenticator.Authenticator;
-import org.pac4j.core.ext.credentials.authenticator.AccessTokenAuthenticator;
+import org.pac4j.core.ext.credentials.authenticator.TokenAuthenticator;
 import org.pac4j.core.ext.credentials.extractor.TokenParameterExtractor;
+import org.pac4j.core.ext.profile.Token;
+import org.pac4j.core.ext.profile.TokenProfile;
 import org.pac4j.core.ext.profile.creator.TokenProfileCreator;
 import org.pac4j.core.profile.creator.ProfileCreator;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.http.client.direct.ParameterClient;
 
 @SuppressWarnings("rawtypes")
-public class AccessTokenClient extends ParameterClient {
+public abstract class TokenClient<C extends TokenCredentials, P extends TokenProfile, T extends Token> extends ParameterClient {
 	
-	protected String profileUrl;
-	
-	public AccessTokenClient() {
-	}
-	
-	public AccessTokenClient(final String profileUrl) {
-		this.profileUrl = profileUrl;
+	public TokenClient() {
 	}
 
-	public AccessTokenClient(final String profileUrl, final String parameterName, final Authenticator tokenAuthenticator) {
+	public TokenClient(final String parameterName, final TokenAuthenticator<C, P, T> tokenAuthenticator) {
 		super(parameterName, tokenAuthenticator);
-		this.profileUrl = profileUrl;
 	}
 
-	public AccessTokenClient(final String profileUrl, final String parameterName, final Authenticator tokenAuthenticator,
+	public TokenClient(final String parameterName, final TokenAuthenticator<C, P, T> tokenAuthenticator,
 			final ProfileCreator profileCreator) {
 		super(parameterName, tokenAuthenticator, profileCreator);
-		this.profileUrl = profileUrl;
 	}
 	
 	@Override
 	protected void clientInit() {
 		super.clientInit();
-		defaultAuthenticator(new AccessTokenAuthenticator(profileUrl));
 		defaultProfileCreator(new TokenProfileCreator<TokenCredentials>());
 		defaultCredentialsExtractor(new TokenParameterExtractor(this.getParameterName(), this.isSupportGetRequest(), this.isSupportPostRequest()));
-	}
-
-	public String getProfileUrl() {
-		return profileUrl;
-	}
-
-	public void setProfileUrl(String profileUrl) {
-		CommonHelper.assertNotNull("profileUrl", profileUrl);
-		this.profileUrl = profileUrl;
+		CommonHelper.assertNotNull("tokenAuthenticator", getAuthenticator());
 	}
 	
 }

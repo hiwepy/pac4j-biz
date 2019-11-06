@@ -15,51 +15,35 @@
  */
 package org.pac4j.core.ext.profile.definition;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.pac4j.core.ext.profile.Token;
 import org.pac4j.core.ext.profile.TokenProfile;
 import org.pac4j.core.ext.profile.TokenProfileDefinition;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.util.InitializableObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * For classes that can set the profile definition.
  */
 public abstract class TokenProfileDefinitionAware<P extends TokenProfile, T extends Token> extends InitializableObject {
 
-	private TokenProfileDefinition<P, T> profileDefinition;
-	private ObjectMapper objectMapper;
+	private List<TokenProfileDefinition<P, T>> profileDefinitions;
 	
-	public TokenProfileDefinition<P, T> getProfileDefinition() {
-		return profileDefinition;
+	public List<TokenProfileDefinition<P, T>> getProfileDefinitions() {
+		return profileDefinitions;
 	}
 
-	public void setProfileDefinition(final TokenProfileDefinition<P, T> profileDefinition) {
-		CommonHelper.assertNotNull("profileDefinition", profileDefinition);
-		this.profileDefinition = profileDefinition;
+	public void setProfileDefinitions(final List<TokenProfileDefinition<P, T>> profileDefinitions) {
+		CommonHelper.assertNotNull("profileDefinitions", profileDefinitions);
+		this.profileDefinitions = profileDefinitions;
 	}
 
 	protected void defaultProfileDefinition(final TokenProfileDefinition<P, T> profileDefinition) {
 		CommonHelper.assertNotNull("profileDefinition", profileDefinition);
-		if (this.profileDefinition == null) {
-			this.profileDefinition = profileDefinition;
-		}
-	}
-
-	protected ObjectMapper getObjectMapper() {
-		return objectMapper;
-	}
-
-	protected void setObjectMapper(ObjectMapper objectMapper) {
-		CommonHelper.assertNotNull("objectMapper", objectMapper);
-		this.objectMapper = objectMapper;
-	}
-	
-	protected void defaultObjectMapper(final ObjectMapper objectMapper) {
-		CommonHelper.assertNotNull("objectMapper", objectMapper);
-		if (this.objectMapper == null) {
-			this.objectMapper = objectMapper;
+		if (this.profileDefinitions == null) {
+			this.profileDefinitions = Arrays.asList(profileDefinition);
 		}
 	}
 	

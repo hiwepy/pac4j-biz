@@ -43,6 +43,8 @@ public abstract class TokenProfileDefinition<P extends TokenProfile, T extends T
      */
     public abstract String getProfileUrl(WebContext context, T accessToken);
 
+    public abstract boolean matchProfile(WebContext context, T accessToken);
+    
     /**
      * Extract the user profile from the response (JSON, XML...) of the profile url.
      *
