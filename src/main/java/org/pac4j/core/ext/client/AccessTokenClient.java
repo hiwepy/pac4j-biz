@@ -17,8 +17,8 @@ package org.pac4j.core.ext.client;
 
 import org.pac4j.core.credentials.TokenCredentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
-import org.pac4j.core.credentials.extractor.ParameterExtractor;
 import org.pac4j.core.ext.credentials.authenticator.AccessTokenAuthenticator;
+import org.pac4j.core.ext.credentials.extractor.TokenParameterExtractor;
 import org.pac4j.core.ext.profile.creator.TokenProfileCreator;
 import org.pac4j.core.profile.creator.ProfileCreator;
 import org.pac4j.core.util.CommonHelper;
@@ -52,7 +52,7 @@ public class AccessTokenClient extends ParameterClient {
 		super.clientInit();
 		defaultAuthenticator(new AccessTokenAuthenticator(profileUrl));
 		defaultProfileCreator(new TokenProfileCreator<TokenCredentials>());
-		defaultCredentialsExtractor(new ParameterExtractor(this.getParameterName(), this.isSupportGetRequest(), this.isSupportPostRequest()));
+		defaultCredentialsExtractor(new TokenParameterExtractor(this.getParameterName(), this.isSupportGetRequest(), this.isSupportPostRequest()));
 	}
 
 	public String getProfileUrl() {

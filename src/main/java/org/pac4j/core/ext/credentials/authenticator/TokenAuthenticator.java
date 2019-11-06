@@ -97,6 +97,7 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, U extends T
     	
     	final T accessToken = getAccessToken(credentials);
     	
+    	logger.debug("accessToken: {}", accessToken);
     	
         final String profileUrl = getProfileDefinition().getProfileUrl(context, accessToken);
 
