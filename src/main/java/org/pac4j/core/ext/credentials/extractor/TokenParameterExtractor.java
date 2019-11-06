@@ -26,6 +26,8 @@ import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONObject;
+
 public class TokenParameterExtractor extends ParameterExtractor {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -59,17 +61,20 @@ public class TokenParameterExtractor extends ParameterExtractor {
             throw new CredentialsException("POST requests not supported");
         }
 
-        logger.debug("parameterName: {}", this.parameterName);
-       
+        logger.debug("ParameterName: {}", this.parameterName);
+        logger.debug("RequestContent: {}",  context.getRequestContent());
+        logger.debug("RequestParameters: {}",  JSONObject.toJSONString(context.getRequestParameters()));
         
-        final Optional<String> value = context.getRequestParameter(this.parameterName);
-        
-        logger.debug("token : {}", value.get());
-        
+        Optional<String> value = context.getRequestParameter(this.parameterName);
         if (!value.isPresent()) {
-            return Optional.empty();
+        	value = context.getRequestHeader(this.parameterName);
+        	if (!value.isPresent()) {
+        		return Optional.empty();
+        	}
         }
 
+        logger.debug("token : {}", value.get());
+        
         return Optional.of(new TokenCredentials(value.get()));
     }
 	
