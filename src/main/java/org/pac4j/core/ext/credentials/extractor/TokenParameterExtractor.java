@@ -16,7 +16,7 @@
 package org.pac4j.core.ext.credentials.extractor;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -76,8 +76,6 @@ public class TokenParameterExtractor extends ParameterExtractor {
         }
 
         logger.debug("ParameterName: {}", this.parameterName);
-        logger.debug("RequestContent: {}",  context.getRequestContent());
-        logger.debug("RequestParameters: {}",  JSONObject.toJSONString(context.getRequestParameters()));
         
         Optional<String> value = context.getRequestParameter(this.parameterName);
         if (!value.isPresent()) {
@@ -86,13 +84,17 @@ public class TokenParameterExtractor extends ParameterExtractor {
         		return Optional.empty();
         	}
         }
-
-        logger.debug("token : {}", value.get());
+        
+        logger.debug("RequestContent: {}",  context.getRequestContent());
+        logger.debug("RequestParameters: {}",  JSONObject.toJSONString(context.getRequestParameters()));
         
         try {
-        	  return Optional.of(new TokenCredentials( URLDecoder.decode(value.get(), getCharset())));
+        	String tokenString =  URLEncoder.encode(value.get(), getCharset());
+        	logger.debug("token : {}", tokenString);
+        	return Optional.of(new TokenCredentials(tokenString));
 		} catch (UnsupportedEncodingException e) {
-			  return Optional.of(new TokenCredentials(value.get()));
+			logger.debug("token : {}", value.get());
+			return Optional.of(new TokenCredentials(value.get()));
 		}
     }
 	

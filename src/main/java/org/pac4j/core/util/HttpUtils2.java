@@ -23,9 +23,13 @@ import java.util.Map;
 
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.ext.utils.HttpHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpUtils2 {
-
+	
+	protected static final Logger logger = LoggerFactory.getLogger(HttpUtils2.class);
+	
 	public static String buildURL(String baseURL, Map<String, String> paramsMap){
 		if(paramsMap == null){
 			return baseURL;
@@ -64,16 +68,18 @@ public class HttpUtils2 {
 	
 	public static HttpURLConnection openGetConnection(String url, final Map<String, String> params) throws IOException {
 		url = buildURL(url, params);
+		logger.debug("url : {}", url);
         return HttpUtils.openConnection(new URL(url), HttpConstants.HTTP_METHOD.GET.name(), null);
     }
 
     public static HttpURLConnection openGetConnection(String url, final Map<String, String> headers, final Map<String,String> params) throws IOException {
     	url = buildURL(url, params);
+    	logger.debug("url : {}", url);
         return HttpUtils.openConnection(new URL(url), HttpConstants.HTTP_METHOD.GET.name(), headers);
     }
     
     public static HttpURLConnection openPostConnection(String url, final Map<String, String> headers , final Map<String,String> params) throws IOException{
-    	url = buildURL(url, params);
+    	logger.debug("url : {}", url);
 		// 此处的urlConnection对象实际上是根据URL的 请求协议(此处是http)生成的URLConnection类 的子类HttpURLConnection,故此处最好将其转化 为HttpURLConnection类型的对象,以便用到HttpURLConnection更多的API.如下: 
 		HttpURLConnection httpConn = HttpUtils.openPostConnection(new URL(url), headers); 
 		/* 

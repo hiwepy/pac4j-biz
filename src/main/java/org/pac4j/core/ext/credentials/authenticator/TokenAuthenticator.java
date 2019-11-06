@@ -52,6 +52,8 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 	protected final String DEFAULT_ACCEPT_HEADER = "application/json, text/plain, */*";
 	
 	private String parameterName;
+	
+	private boolean parameterPass;
 	/* Map containing user defined headers */
 	private Map<String, String> customHeaders = new HashMap<>();
     /* Map containing user defined parameters */
@@ -188,12 +190,16 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
          if(!headers.containsKey(HttpHeaders.USER_AGENT)) {
         	 headers.put(HttpHeaders.USER_AGENT, context.getRequestHeader(HttpHeaders.USER_AGENT).orElse(DEFAULT_USER_AGENT));
          }
-         // 拷贝本次请求的参数到新请求中
-         for (String paramName : context.getRequestParameters().keySet()) {
-        	 if(!params.containsKey(paramName)) {
-        		 params.put(paramName, context.getRequestParameter(paramName).orElse(""));
-        	 }
+         
+         if(isParameterPass()) {
+        	// 拷贝本次请求的参数到新请求中
+             for (String paramName : context.getRequestParameters().keySet()) {
+            	 if(!params.containsKey(paramName)) {
+            		 params.put(paramName, context.getRequestParameter(paramName).orElse(""));
+            	 }
+             }
          }
+         
          params.put(getParameterName(), token.getRawResponse());
          
          logger.debug("headers: {} ", JSONObject.toJSONString(headers));
@@ -224,4 +230,15 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 	public void setParameterName(String parameterName) {
 		this.parameterName = parameterName;
 	}
+
+	public boolean isParameterPass() {
+		return parameterPass;
+	}
+
+	public void setParameterPass(boolean parameterPass) {
+		this.parameterPass = parameterPass;
+	}
+	
+	
+	
 }
