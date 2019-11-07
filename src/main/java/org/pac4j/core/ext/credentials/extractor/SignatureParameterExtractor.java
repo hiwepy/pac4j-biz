@@ -15,27 +15,26 @@
  */
 package org.pac4j.core.ext.credentials.extractor;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.pac4j.core.context.ContextHelper;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.credentials.TokenCredentials;
-import org.pac4j.core.credentials.extractor.ParameterExtractor;
+import org.pac4j.core.credentials.extractor.CredentialsExtractor;
 import org.pac4j.core.exception.CredentialsException;
+import org.pac4j.core.ext.Pac4jExtConstants;
+import org.pac4j.core.ext.credentials.SignatureCredentials;
 import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONObject;
-
-public class TokenParameterExtractor extends ParameterExtractor {
+public class SignatureParameterExtractor implements CredentialsExtractor<SignatureCredentials> {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	private final String parameterName;
+	private String signatureParamName = Pac4jExtConstants.SIGNATURE_PARAM;
+	
+	private String paylodParamName = Pac4jExtConstants.PAYLOAD_PARAM;
 
     private boolean supportGetRequest = true;
 
@@ -43,28 +42,25 @@ public class TokenParameterExtractor extends ParameterExtractor {
     
     private String charset = StandardCharsets.UTF_8.name();
     
-	public TokenParameterExtractor(String parameterName) {
-		this(parameterName, false, true);
+	public SignatureParameterExtractor(String paylodParamName, String signatureParamName) {
+		this(signatureParamName, paylodParamName, false, true, StandardCharsets.UTF_8.name());
 	}
 	
-	public TokenParameterExtractor(String parameterName, boolean supportGetRequest, boolean supportPostRequest) {
-		super(parameterName, supportGetRequest, supportPostRequest);
-		this.parameterName = parameterName;
-        this.supportGetRequest = supportGetRequest;
-        this.supportPostRequest = supportPostRequest;
+	public SignatureParameterExtractor(String paylodParamName, String signatureParamName, String charset) {
+		this(signatureParamName, paylodParamName, false, true, charset);
 	}
 	
-	public TokenParameterExtractor(String parameterName, boolean supportGetRequest, boolean supportPostRequest, String charset) {
-		super(parameterName, supportGetRequest, supportPostRequest);
-		this.parameterName = parameterName;
+	public SignatureParameterExtractor(String paylodParamName, String signatureParamName, boolean supportGetRequest,
+			boolean supportPostRequest, String charset) {
+		this.paylodParamName = paylodParamName;
+		this.signatureParamName = signatureParamName;
         this.supportGetRequest = supportGetRequest;
         this.supportPostRequest = supportPostRequest;
         this.charset = charset;
 	}
 	
-	
 	@Override
-    public Optional<TokenCredentials> extract(WebContext context) {
+    public Optional<SignatureCredentials> extract(WebContext context) {
 		
 		logger.debug("supportGetRequest: {}", this.supportGetRequest);
 		logger.debug("supportPostRequest: {}", this.supportPostRequest);
@@ -74,36 +70,27 @@ public class TokenParameterExtractor extends ParameterExtractor {
         } else if (ContextHelper.isPost(context) && !supportPostRequest) {
             throw new CredentialsException("POST requests not supported");
         }
-
-        logger.debug("ParameterName: {}", this.parameterName);
         
-        Optional<String> value = context.getRequestParameter(this.parameterName);
-        if (!value.isPresent()) {
-        	value = context.getRequestHeader(this.parameterName);
-        	if (!value.isPresent()) {
-        		return Optional.empty();
-        	}
+        logger.debug("paylodParamName: {}", this.paylodParamName);
+        logger.debug("signatureParamName: {}", this.signatureParamName);
+        
+        Optional<String> paylod = context.getRequestParameter(this.paylodParamName);
+        Optional<String> signature = context.getRequestParameter(this.signatureParamName);
+        if (!paylod.isPresent() || !signature.isPresent()) {
+    		return Optional.empty();
         }
         
-        logger.debug("RequestContent: {}",  context.getRequestContent());
-        logger.debug("RequestParameters: {}",  JSONObject.toJSONString(context.getRequestParameters()));
-        
-        try {
-        	String tokenString =  URLEncoder.encode(value.get(), getCharset());
-        	logger.debug("token : {}", tokenString);
-        	return Optional.of(new TokenCredentials(tokenString));
-		} catch (UnsupportedEncodingException e) {
-			logger.debug("token : {}", value.get());
-			return Optional.of(new TokenCredentials(value.get()));
-		}
+    	logger.debug("paylod : {}", paylod.get());
+    	logger.debug("signature : {}", signature.get());
+    	return Optional.of(new SignatureCredentials(paylod.get(), signature.get()));
     }
 	
 	@Override
     public String toString() {
-        return CommonHelper.toNiceString(this.getClass(), "parameterName", parameterName,
-                "supportGetRequest", supportGetRequest, "supportPostRequest", supportPostRequest, "charset", charset);
+        return CommonHelper.toNiceString(this.getClass(), "signatureParamName", signatureParamName,
+        		"paylodParamName", paylodParamName, "supportGetRequest", supportGetRequest, "supportPostRequest", supportPostRequest, "charset", charset);
     }
-
+	
 	public boolean isSupportGetRequest() {
 		return supportGetRequest;
 	}
@@ -120,16 +107,28 @@ public class TokenParameterExtractor extends ParameterExtractor {
 		this.supportPostRequest = supportPostRequest;
 	}
 
-	public String getParameterName() {
-		return parameterName;
-	}
-
 	public String getCharset() {
 		return charset;
 	}
 
 	public void setCharset(String charset) {
 		this.charset = charset;
+	}
+
+	public String getSignatureParamName() {
+		return signatureParamName;
+	}
+
+	public void setSignatureParamName(String signatureParamName) {
+		this.signatureParamName = signatureParamName;
+	}
+
+	public String getPaylodParamName() {
+		return paylodParamName;
+	}
+
+	public void setPaylodParamName(String paylodParamName) {
+		this.paylodParamName = paylodParamName;
 	}
 
 }

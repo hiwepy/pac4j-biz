@@ -54,21 +54,26 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 	protected final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0";
 	protected final String DEFAULT_ACCEPT_HEADER = "application/json, text/plain, */*";
 	
-	private String parameterName;
-	
-	private boolean parameterPass;
 	/* Map containing user defined headers */
 	private Map<String, String> customHeaders = new HashMap<>();
     /* Map containing user defined parameters */
     private Map<String, String> customParams = new HashMap<>();
     
     private String charset = StandardCharsets.UTF_8.name();
-    
+
+	private boolean encodeParams = true;
+	
+	private boolean passOriginParams = true;
+	
+	private String parameterName = "token";
+	
 	public TokenAuthenticator() {
 	}
 	
-	public TokenAuthenticator(String parameterName) {
+	public TokenAuthenticator(String parameterName, boolean passOriginParams, boolean encodeParams) {
 		this.parameterName = parameterName;
+        this.passOriginParams = passOriginParams;
+        this.encodeParams = encodeParams;
 	}
 	
 	@Override
@@ -196,19 +201,27 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
         	 headers.put(HttpHeaders.USER_AGENT, context.getRequestHeader(HttpHeaders.USER_AGENT).orElse(DEFAULT_USER_AGENT));
          }
          
-         // 对自定义参数进行转码
-         for (String param : params.keySet()) {
-        	 try {
-				params.replace(param, URLEncoder.encode(params.get(param), getCharset()));
-			} catch (UnsupportedEncodingException e) {
-			}
-		 }
+         if(this.isEncodeParams()) {
+        	// 对自定义参数进行转码
+             for (String paramName : params.keySet()) {
+            	 try {
+    				params.replace(paramName, URLEncoder.encode(params.get(paramName), getCharset()));
+    			} catch (UnsupportedEncodingException e) {
+    			}
+    		 }
+         }
          
-         if(isParameterPass()) {
+         if(this.isPassOriginParams()) {
         	// 拷贝本次请求的参数到新请求中
              for (String paramName : context.getRequestParameters().keySet()) {
             	 if(!params.containsKey(paramName)) {
-            		 params.put(paramName, context.getRequestParameter(paramName).orElse(""));
+	            	 try {
+	    				params.put(paramName, this.isEncodeParams() ? 
+	    						URLEncoder.encode(context.getRequestParameter(paramName).orElse(""), getCharset()) 
+	    						: context.getRequestParameter(paramName).orElse(""));
+	    			} catch (UnsupportedEncodingException e) {
+	    				params.put(paramName, context.getRequestParameter(paramName).orElse(""));
+	    			}
             	 }
              }
          }
@@ -244,20 +257,28 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 		this.parameterName = parameterName;
 	}
 
-	public boolean isParameterPass() {
-		return parameterPass;
-	}
-
-	public void setParameterPass(boolean parameterPass) {
-		this.parameterPass = parameterPass;
-	}
-
 	public String getCharset() {
 		return charset;
 	}
 
 	public void setCharset(String charset) {
 		this.charset = charset;
+	}
+
+	public boolean isEncodeParams() {
+		return encodeParams;
+	}
+
+	public void setEncodeParams(boolean encodeParams) {
+		this.encodeParams = encodeParams;
+	}
+
+	public boolean isPassOriginParams() {
+		return passOriginParams;
+	}
+
+	public void setPassOriginParams(boolean passOriginParams) {
+		this.passOriginParams = passOriginParams;
 	}
 	
 }

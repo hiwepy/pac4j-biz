@@ -17,39 +17,29 @@ package org.pac4j.core.ext.profile;
 
 import java.util.function.Function;
 
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.definition.CommonProfileDefinition;
 
 /**
- * Token profile definition.
+ * Signature profile definition.
  */
-public abstract class TokenProfileDefinition<P extends TokenProfile, T extends Token> extends CommonProfileDefinition<P> {
+public abstract class SignatureProfileDefinition<P extends SignatureProfile, T extends Signature> extends CommonProfileDefinition<P> {
 
-	
-    public TokenProfileDefinition() {
+    public SignatureProfileDefinition() {
         super();
     }
 
-    public TokenProfileDefinition(final Function<Object[], P> profileFactory) {
+    public SignatureProfileDefinition(final Function<Object[], P> profileFactory) {
         super(profileFactory);
     }
     
     /**
-     * Retrieve the url of the profile of the authenticated user for the provider.
-     *
-     * @param accessToken only used when constructing dynamic urls from data in the token
-     * @return the url of the user profile given by the provider
-     */
-    public abstract String getProfileUrl(WebContext context, T accessToken);
-
-    /**
-     * Extract the user profile from the response (JSON, XML...) of the profile url.
+     * Extract the user profile from the response (JSON, XML...) of the payload.
      *
      * @param body the response body
      * @return the returned profile
      */
-    public abstract P extractUserProfile(String body);
+    public abstract P extractUserProfile(String payload, String signature);
     
     /**
      * Throws a {@link TechnicalException} to indicate that user profile extraction has failed.

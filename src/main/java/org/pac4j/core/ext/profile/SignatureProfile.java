@@ -13,20 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.pac4j.core.ext;
+package org.pac4j.core.ext.profile;
+
+
+import org.pac4j.core.profile.CommonProfile;
 
 /**
- * TODO
- * 
- * @author ： <a href="https://github.com/vindell">vindell</a>
+ * <p>This class is the user profile for signature with appropriate getters.</p>
+ * <p>It is returned by the {@link org.pac4j.core.ext.client.SignatureClient}.</p>
+ *
+ * @author 		： <a href="https://github.com/vindell">wandl</a>
  */
-public class Pac4jExtConstants {
-
-	public static String CAPTCHA = "captcha";
-	public static String TOKEN = "token";
-	public static final String PAYLOAD_PARAM = "payload";
-	public static final String SIGNATURE_PARAM = "signature";
-	public static String RETRY_TIMES_KEY_ATTRIBUTE_NAME = "pac4jLoginFailureRetries";
-	public static String RETRY_TIMES_KEY_PARAM_NAME = "failureRetries";
-	
+public class SignatureProfile extends CommonProfile {
+     
 }
