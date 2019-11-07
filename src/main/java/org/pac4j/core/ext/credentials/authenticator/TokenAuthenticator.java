@@ -16,7 +16,10 @@
 package org.pac4j.core.ext.credentials.authenticator;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +61,8 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 	private Map<String, String> customHeaders = new HashMap<>();
     /* Map containing user defined parameters */
     private Map<String, String> customParams = new HashMap<>();
+    
+    private String charset = StandardCharsets.UTF_8.name();
     
 	public TokenAuthenticator() {
 	}
@@ -191,6 +196,14 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
         	 headers.put(HttpHeaders.USER_AGENT, context.getRequestHeader(HttpHeaders.USER_AGENT).orElse(DEFAULT_USER_AGENT));
          }
          
+         // 对自定义参数进行转码
+         for (String param : params.keySet()) {
+        	 try {
+				params.replace(param, URLEncoder.encode(params.get(param), getCharset()));
+			} catch (UnsupportedEncodingException e) {
+			}
+		 }
+         
          if(isParameterPass()) {
         	// 拷贝本次请求的参数到新请求中
              for (String paramName : context.getRequestParameters().keySet()) {
@@ -238,7 +251,13 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 	public void setParameterPass(boolean parameterPass) {
 		this.parameterPass = parameterPass;
 	}
-	
-	
+
+	public String getCharset() {
+		return charset;
+	}
+
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
 	
 }
