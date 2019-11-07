@@ -18,6 +18,7 @@ package org.pac4j.core.ext.credentials.extractor;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.context.ContextHelper;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.extractor.CredentialsExtractor;
@@ -34,25 +35,22 @@ public class SignatureParameterExtractor implements CredentialsExtractor<Signatu
 	
 	private String signatureParamName = Pac4jExtConstants.SIGNATURE_PARAM;
 	
-	private String paylodParamName = Pac4jExtConstants.PAYLOAD_PARAM;
-
     private boolean supportGetRequest = true;
 
     private boolean supportPostRequest;
     
     private String charset = StandardCharsets.UTF_8.name();
     
-	public SignatureParameterExtractor(String paylodParamName, String signatureParamName) {
-		this(signatureParamName, paylodParamName, false, true, StandardCharsets.UTF_8.name());
+	public SignatureParameterExtractor(String signatureParamName) {
+		this(signatureParamName, false, true, StandardCharsets.UTF_8.name());
 	}
 	
-	public SignatureParameterExtractor(String paylodParamName, String signatureParamName, String charset) {
-		this(signatureParamName, paylodParamName, false, true, charset);
+	public SignatureParameterExtractor(String signatureParamName, String charset) {
+		this(signatureParamName, false, true, charset);
 	}
 	
-	public SignatureParameterExtractor(String paylodParamName, String signatureParamName, boolean supportGetRequest,
+	public SignatureParameterExtractor(String signatureParamName, boolean supportGetRequest,
 			boolean supportPostRequest, String charset) {
-		this.paylodParamName = paylodParamName;
 		this.signatureParamName = signatureParamName;
         this.supportGetRequest = supportGetRequest;
         this.supportPostRequest = supportPostRequest;
@@ -71,24 +69,23 @@ public class SignatureParameterExtractor implements CredentialsExtractor<Signatu
             throw new CredentialsException("POST requests not supported");
         }
         
-        logger.debug("paylodParamName: {}", this.paylodParamName);
         logger.debug("signatureParamName: {}", this.signatureParamName);
         
-        Optional<String> paylod = context.getRequestParameter(this.paylodParamName);
+        String paylod = context.getRequestContent();
         Optional<String> signature = context.getRequestParameter(this.signatureParamName);
-        if (!paylod.isPresent() || !signature.isPresent()) {
+        if ( StringUtils.isEmpty(paylod) || !signature.isPresent()) {
     		return Optional.empty();
         }
         
-    	logger.debug("paylod : {}", paylod.get());
+    	logger.debug("paylod : {}", paylod);
     	logger.debug("signature : {}", signature.get());
-    	return Optional.of(new SignatureCredentials(paylod.get(), signature.get()));
+    	return Optional.of(new SignatureCredentials(paylod, signature.get()));
     }
 	
 	@Override
     public String toString() {
         return CommonHelper.toNiceString(this.getClass(), "signatureParamName", signatureParamName,
-        		"paylodParamName", paylodParamName, "supportGetRequest", supportGetRequest, "supportPostRequest", supportPostRequest, "charset", charset);
+        		 "supportGetRequest", supportGetRequest, "supportPostRequest", supportPostRequest, "charset", charset);
     }
 	
 	public boolean isSupportGetRequest() {
@@ -121,14 +118,6 @@ public class SignatureParameterExtractor implements CredentialsExtractor<Signatu
 
 	public void setSignatureParamName(String signatureParamName) {
 		this.signatureParamName = signatureParamName;
-	}
-
-	public String getPaylodParamName() {
-		return paylodParamName;
-	}
-
-	public void setPaylodParamName(String paylodParamName) {
-		this.paylodParamName = paylodParamName;
 	}
 
 }

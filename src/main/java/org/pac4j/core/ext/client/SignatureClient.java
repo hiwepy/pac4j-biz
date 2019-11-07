@@ -33,8 +33,6 @@ import org.pac4j.core.util.CommonHelper;
 public abstract class SignatureClient<C extends SignatureCredentials, P extends SignatureProfile, T extends Signature>
 		extends DirectClient<C> {
 	
-	private String paylodParamName = Pac4jExtConstants.PAYLOAD_PARAM;
-
 	private String signatureParamName = Pac4jExtConstants.SIGNATURE_PARAM;
 	
 	private boolean supportGetRequest = true;
@@ -46,16 +44,14 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 	public SignatureClient() {
 	}
 	
-	public SignatureClient(final String paylodParamName, final String signatureParamName,
+	public SignatureClient(final String signatureParamName,
 			final SignatureAuthenticator<C, P, T> tokenAuthenticator) {
-		this.paylodParamName = paylodParamName;
 		this.signatureParamName = signatureParamName;
 		defaultAuthenticator(tokenAuthenticator);
 	}
 
-	public SignatureClient(final String paylodParamName, final String signatureParamName,
+	public SignatureClient(final String signatureParamName,
 			final SignatureAuthenticator<C, P, T> tokenAuthenticator, final ProfileCreator<C> profileCreator) {
-		this.paylodParamName = paylodParamName;
 		this.signatureParamName = signatureParamName;
 		defaultAuthenticator(tokenAuthenticator);
 		defaultProfileCreator(profileCreator);
@@ -65,7 +61,7 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 	protected void clientInit() {
 		defaultProfileCreator(new SignatureProfileCreator<C>());
 		defaultCredentialsExtractor((CredentialsExtractor<C>) new SignatureParameterExtractor(
-				this.getPaylodParamName(), this.getSignatureParamName(), this.isSupportGetRequest(),
+				this.getSignatureParamName(), this.isSupportGetRequest(),
 				this.isSupportPostRequest(), this.getCharset()));
 		CommonHelper.assertNotNull("tokenAuthenticator", getAuthenticator());
 	}
@@ -92,10 +88,6 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 
 	public void setCharset(String charset) {
 		this.charset = charset;
-	}
-
-	public String getPaylodParamName() {
-		return paylodParamName;
 	}
 
 	public String getSignatureParamName() {

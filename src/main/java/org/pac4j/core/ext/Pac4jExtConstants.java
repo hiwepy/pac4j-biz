@@ -24,7 +24,6 @@ public class Pac4jExtConstants {
 
 	public static String CAPTCHA = "captcha";
 	public static String TOKEN = "token";
-	public static final String PAYLOAD_PARAM = "payload";
 	public static final String SIGNATURE_PARAM = "signature";
 	public static String RETRY_TIMES_KEY_ATTRIBUTE_NAME = "pac4jLoginFailureRetries";
 	public static String RETRY_TIMES_KEY_PARAM_NAME = "failureRetries";
