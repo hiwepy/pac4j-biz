@@ -89,7 +89,7 @@ public class TokenParameterExtractor extends ParameterExtractor {
         logger.debug("RequestParameters: {}",  JSONObject.toJSONString(context.getRequestParameters()));
         
         try {
-        	String tokenString =  URLEncoder.encode(value.get(), getCharset());
+        	String tokenString =  URLEncoder.encode(value.get().replace(" ", "+"), getCharset());
         	logger.debug("encoded token : {}", tokenString);
         	return Optional.of(new TokenCredentials(tokenString));
 		} catch (UnsupportedEncodingException e) {
