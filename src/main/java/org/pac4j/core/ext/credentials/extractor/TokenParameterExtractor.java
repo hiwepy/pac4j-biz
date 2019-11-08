@@ -90,7 +90,7 @@ public class TokenParameterExtractor extends ParameterExtractor {
         
         try {
         	String tokenString =  URLEncoder.encode(value.get(), getCharset());
-        	logger.debug("token : {}", tokenString);
+        	logger.debug("encoded token : {}", tokenString);
         	return Optional.of(new TokenCredentials(tokenString));
 		} catch (UnsupportedEncodingException e) {
 			logger.debug("token : {}", value.get());

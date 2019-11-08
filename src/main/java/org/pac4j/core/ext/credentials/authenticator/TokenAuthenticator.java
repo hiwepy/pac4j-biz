@@ -63,16 +63,13 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 
 	private boolean encodeParams = true;
 	
-	private boolean passOriginParams = true;
-	
 	private String parameterName = "token";
 	
 	public TokenAuthenticator() {
 	}
 	
-	public TokenAuthenticator(String parameterName, boolean passOriginParams, boolean encodeParams) {
+	public TokenAuthenticator(String parameterName, boolean encodeParams) {
 		this.parameterName = parameterName;
-        this.passOriginParams = passOriginParams;
         this.encodeParams = encodeParams;
 	}
 	
@@ -155,9 +152,13 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
         HttpURLConnection connection = null;
         try {
         	
-            signRequest(context, accessToken, profileUrl, getCustomHeaders(), getCustomParams());
-            
-			connection = HttpUtils2.openGetConnection(profileUrl, getCustomHeaders(), getCustomParams());
+        	Map<String, String> finalHeaders = this.finalHeaders(context, accessToken, profileUrl, getCustomHeaders());
+       	 	logger.debug("finalHeaders: {} ", JSONObject.toJSONString(finalHeaders));
+        	
+       	 	Map<String, String> finalParams = this.finalParams(context, accessToken, profileUrl, getCustomParams());
+            logger.debug("finalParams: {} ", JSONObject.toJSONString(finalParams));
+             
+			connection = HttpUtils2.openGetConnection(profileUrl, finalHeaders, finalParams);
             
             int code = connection.getResponseCode();
             final long t1 = System.currentTimeMillis();
@@ -178,15 +179,11 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
         }
     }
 
-	/**
-     * Sign the request.
-     *
-     * @param service the service
-     * @param token the token
-     * @param request the request
-     */
-    protected void signRequest(final WebContext context,final T token, final String url, final Map<String, String> headers , final Map<String,String> params) {
+    protected Map<String, String> finalHeaders(final WebContext context,final T token, final String url, final Map<String, String> headers ) {
     	
+    	 final Map<String,String> finalHeaders = new HashMap<>();
+    	 finalHeaders.putAll(headers);
+    	 
          /* 
   		 * 配置本次连接的Content-type，配置为application/x-www-form-urlencoded的 意思是正文是urlencoded编码过的form参数，下面我们可以看到我们对正文内容使用URLEncoder.encode进行编码
   		 */	
@@ -201,37 +198,30 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
         	 headers.put(HttpHeaders.USER_AGENT, context.getRequestHeader(HttpHeaders.USER_AGENT).orElse(DEFAULT_USER_AGENT));
          }
          
-         if(this.isEncodeParams()) {
-        	// 对自定义参数进行转码
-             for (String paramName : params.keySet()) {
-            	 try {
-    				params.replace(paramName, URLEncoder.encode(params.get(paramName), getCharset()));
-    			} catch (UnsupportedEncodingException e) {
-    			}
-    		 }
-         }
-         
-         if(this.isPassOriginParams()) {
-        	// 拷贝本次请求的参数到新请求中
-             for (String paramName : context.getRequestParameters().keySet()) {
-            	 if(!params.containsKey(paramName)) {
-	            	 try {
-	    				params.put(paramName, this.isEncodeParams() ? 
-	    						URLEncoder.encode(context.getRequestParameter(paramName).orElse(""), getCharset()) 
-	    						: context.getRequestParameter(paramName).orElse(""));
-	    			} catch (UnsupportedEncodingException e) {
-	    				params.put(paramName, context.getRequestParameter(paramName).orElse(""));
-	    			}
-            	 }
-             }
-         }
-         
-         params.put(getParameterName(), token.getRawResponse());
-         
-         logger.debug("headers: {} ", JSONObject.toJSONString(headers));
-         logger.debug("params: {} ", JSONObject.toJSONString(params));
+         return finalHeaders;
          
     }
+    
+    protected Map<String, String> finalParams(final WebContext context,final T token, final String url, final Map<String,String> params) {
+    	
+        final Map<String,String> finalParams = new HashMap<>();
+        finalParams.putAll(params);
+        
+        if(this.isEncodeParams()) {
+       	// 对自定义参数进行转码
+            for (String paramName : finalParams.keySet()) {
+           	 try {
+           		 finalParams.put(paramName, URLEncoder.encode(params.get(paramName), getCharset()));
+   			} catch (UnsupportedEncodingException e) {
+   			}
+   		 }
+        }
+        
+        finalParams.put(getParameterName(), token.getRawResponse());
+        
+        return finalParams;
+        
+   }
 
 	public Map<String, String> getCustomHeaders() {
 		return customHeaders;
@@ -271,14 +261,6 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
 
 	public void setEncodeParams(boolean encodeParams) {
 		this.encodeParams = encodeParams;
-	}
-
-	public boolean isPassOriginParams() {
-		return passOriginParams;
-	}
-
-	public void setPassOriginParams(boolean passOriginParams) {
-		this.passOriginParams = passOriginParams;
 	}
 	
 }
