@@ -26,10 +26,10 @@ import org.pac4j.core.profile.creator.ProfileCreator;
  * Token profile creator.
  * @author 		： <a href="https://github.com/vindell">wandl</a>
  */
-public class TokenProfileCreator<C extends TokenCredentials> implements ProfileCreator<C> {
+public class TokenProfileCreator implements ProfileCreator<TokenCredentials> {
     
     @Override
-    public Optional<UserProfile> create(final C credentials, final WebContext context) {
+    public Optional<UserProfile> create(final TokenCredentials credentials, final WebContext context) {
         return Optional.ofNullable(credentials.getUserProfile());
     }
 	

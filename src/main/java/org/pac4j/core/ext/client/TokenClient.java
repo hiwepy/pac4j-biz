@@ -15,7 +15,11 @@
  */
 package org.pac4j.core.ext.client;
 
+import java.util.Optional;
+
+import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.credentials.TokenCredentials;
+import org.pac4j.core.exception.http.RedirectionActionHelper;
 import org.pac4j.core.ext.credentials.authenticator.TokenAuthenticator;
 import org.pac4j.core.ext.credentials.extractor.TokenParameterExtractor;
 import org.pac4j.core.ext.profile.Token;
@@ -23,29 +27,61 @@ import org.pac4j.core.ext.profile.TokenProfile;
 import org.pac4j.core.ext.profile.creator.TokenProfileCreator;
 import org.pac4j.core.profile.creator.ProfileCreator;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.http.client.direct.ParameterClient;
 
-@SuppressWarnings("rawtypes")
-public abstract class TokenClient<C extends TokenCredentials, P extends TokenProfile, T extends Token> extends ParameterClient {
+public abstract class TokenClient<P extends TokenProfile, T extends Token> extends IndirectClient<TokenCredentials> {
+
+	private String parameterName = "";
 	
+	private boolean supportGetRequest = false;
+	
+	private boolean supportPostRequest = true;
+
 	public TokenClient() {
 	}
 
-	public TokenClient(final String parameterName, final TokenAuthenticator<C, P, T> tokenAuthenticator) {
-		super(parameterName, tokenAuthenticator);
+	public TokenClient(final String parameterName, final TokenAuthenticator<P, T> tokenAuthenticator) {
+		this.parameterName = parameterName;
+        defaultAuthenticator(tokenAuthenticator);
 	}
 
-	public TokenClient(final String parameterName, final TokenAuthenticator<C, P, T> tokenAuthenticator,
-			final ProfileCreator profileCreator) {
-		super(parameterName, tokenAuthenticator, profileCreator);
-	}
+    public TokenClient(final String parameterName,
+                           final TokenAuthenticator<P, T> tokenAuthenticator,
+                           final ProfileCreator<TokenCredentials> profileCreator) {
+        this.parameterName = parameterName;
+        defaultAuthenticator(tokenAuthenticator);
+        defaultProfileCreator(profileCreator);
+    }
 	
 	@Override
 	protected void clientInit() {
-		super.clientInit();
-		defaultProfileCreator(new TokenProfileCreator<TokenCredentials>());
+		defaultRedirectionActionBuilder(webContext -> Optional.of(RedirectionActionHelper.buildRedirectUrlAction(webContext, computeFinalCallbackUrl(webContext))));
+		defaultProfileCreator(new TokenProfileCreator());
 		defaultCredentialsExtractor(new TokenParameterExtractor(this.getParameterName(), this.isSupportGetRequest(), this.isSupportPostRequest()));
 		CommonHelper.assertNotNull("tokenAuthenticator", getAuthenticator());
+	}
+
+	public String getParameterName() {
+		return parameterName;
+	}
+
+	public void setParameterName(String parameterName) {
+		this.parameterName = parameterName;
+	}
+
+	public boolean isSupportGetRequest() {
+		return supportGetRequest;
+	}
+
+	public void setSupportGetRequest(boolean supportGetRequest) {
+		this.supportGetRequest = supportGetRequest;
+	}
+
+	public boolean isSupportPostRequest() {
+		return supportPostRequest;
+	}
+
+	public void setSupportPostRequest(boolean supportPostRequest) {
+		this.supportPostRequest = supportPostRequest;
 	}
 	
 }

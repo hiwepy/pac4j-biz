@@ -16,9 +16,11 @@
 package org.pac4j.core.ext.client;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
-import org.pac4j.core.client.DirectClient;
+import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.credentials.extractor.CredentialsExtractor;
+import org.pac4j.core.exception.http.RedirectionActionHelper;
 import org.pac4j.core.ext.Pac4jExtConstants;
 import org.pac4j.core.ext.credentials.SignatureCredentials;
 import org.pac4j.core.ext.credentials.authenticator.SignatureAuthenticator;
@@ -31,7 +33,7 @@ import org.pac4j.core.util.CommonHelper;
 
 @SuppressWarnings("unchecked")
 public abstract class SignatureClient<C extends SignatureCredentials, P extends SignatureProfile, T extends Signature>
-		extends DirectClient<C> {
+		extends IndirectClient<C> {
 	
 	private String signatureParamName = Pac4jExtConstants.SIGNATURE_PARAM;
 	
@@ -59,6 +61,7 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 
 	@Override
 	protected void clientInit() {
+		defaultRedirectionActionBuilder(webContext -> Optional.of(RedirectionActionHelper.buildRedirectUrlAction(webContext, computeFinalCallbackUrl(webContext))));
 		defaultProfileCreator(new SignatureProfileCreator<C>());
 		defaultCredentialsExtractor((CredentialsExtractor<C>) new SignatureParameterExtractor(
 				this.getSignatureParamName(), this.isSupportGetRequest(),

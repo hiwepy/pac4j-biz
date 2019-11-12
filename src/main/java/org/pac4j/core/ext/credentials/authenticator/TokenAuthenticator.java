@@ -47,8 +47,8 @@ import com.alibaba.fastjson.JSONObject;
  * TODO
  * @author 		： <a href="https://github.com/vindell">vindell</a>
  */
-public abstract class TokenAuthenticator<C extends TokenCredentials, P extends TokenProfile, T extends Token>
-	extends TokenProfileDefinitionAware<P, T>  implements Authenticator<C> {
+public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token>
+	extends TokenProfileDefinitionAware<P, T>  implements Authenticator<TokenCredentials> {
 	
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0";
@@ -80,7 +80,7 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
     }
 	
 	@Override
-    public void validate(final C credentials, final WebContext context) {
+    public void validate(final TokenCredentials credentials, final WebContext context) {
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
@@ -104,7 +104,7 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
      * @param credentials credentials
      * @return the access token
      */
-    protected abstract T getAccessToken(final C credentials);
+    protected abstract T getAccessToken(final TokenCredentials credentials);
     
     /**
      * Retrieve the user profile from the access token.
@@ -113,7 +113,7 @@ public abstract class TokenAuthenticator<C extends TokenCredentials, P extends T
      * @param accessToken the access token
      * @return the user profile
      */
-    protected Optional<P> retrieveUserProfileFromToken(final WebContext context, final C credentials) {
+    protected Optional<P> retrieveUserProfileFromToken(final WebContext context, final TokenCredentials credentials) {
     	
     	final T accessToken = getAccessToken(credentials);
     	
