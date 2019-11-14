@@ -124,6 +124,10 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 		return signatureParamName;
 	}
 	
+	public void setLoginUrl(String loginUrl) {
+		this.loginUrl = loginUrl;
+	}
+	
 	public String getLoginUrl() {
 		return loginUrl;
 	}

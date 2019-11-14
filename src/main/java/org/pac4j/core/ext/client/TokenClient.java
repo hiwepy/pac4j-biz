@@ -111,6 +111,10 @@ public abstract class TokenClient<P extends TokenProfile, T extends Token> exten
 		this.supportPostRequest = supportPostRequest;
 	}
 	
+	public void setLoginUrl(String loginUrl) {
+		this.loginUrl = loginUrl;
+	}
+	
 	public String getLoginUrl() {
 		return loginUrl;
 	}
