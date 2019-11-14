@@ -18,8 +18,10 @@ package org.pac4j.core.ext.client;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import org.pac4j.core.client.IndirectClient;
+import org.pac4j.core.client.DirectClient;
+import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.extractor.CredentialsExtractor;
+import org.pac4j.core.exception.CredentialsException;
 import org.pac4j.core.exception.http.RedirectionActionHelper;
 import org.pac4j.core.ext.Pac4jExtConstants;
 import org.pac4j.core.ext.credentials.SignatureCredentials;
@@ -33,7 +35,7 @@ import org.pac4j.core.util.CommonHelper;
 
 @SuppressWarnings("unchecked")
 public abstract class SignatureClient<C extends SignatureCredentials, P extends SignatureProfile, T extends Signature>
-		extends IndirectClient<C> {
+		extends DirectClient<C> {
 	
 	private String signatureParamName = Pac4jExtConstants.SIGNATURE_PARAM;
 	
@@ -42,7 +44,12 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 	private boolean supportPostRequest;
 
 	private String charset = StandardCharsets.UTF_8.name();
-
+    
+	/** 
+	 * The location of the client login URL, i.e. https://localhost:8080/myapp/login 
+	 */
+	private String loginUrl;
+	
 	public SignatureClient() {
 	}
 	
@@ -61,12 +68,32 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 
 	@Override
 	protected void clientInit() {
-		defaultRedirectionActionBuilder(webContext -> Optional.of(RedirectionActionHelper.buildRedirectUrlAction(webContext, computeFinalCallbackUrl(webContext))));
 		defaultProfileCreator(new SignatureProfileCreator<C>());
 		defaultCredentialsExtractor((CredentialsExtractor<C>) new SignatureParameterExtractor(
 				this.getSignatureParamName(), this.isSupportGetRequest(),
 				this.isSupportPostRequest(), this.getCharset()));
-		CommonHelper.assertNotNull("tokenAuthenticator", getAuthenticator());
+		// ensures components have been properly initialized
+        CommonHelper.assertNotNull("credentialsExtractor", getCredentialsExtractor());
+        CommonHelper.assertNotNull("authenticator", getAuthenticator());
+        CommonHelper.assertNotNull("profileCreator", getProfileCreator());
+	}
+	
+	@Override
+	protected Optional<C> retrieveCredentials(WebContext context) {
+		init();
+        try {
+            final Optional<C> credentials = super.retrieveCredentials(context);
+            if (!credentials.isPresent()) {
+                // redirect to the login page
+                logger.debug("redirectionUrl: {}", getLoginUrl());
+                throw RedirectionActionHelper.buildRedirectUrlAction(context, getLoginUrl());
+            }
+
+            return credentials;
+        } catch (CredentialsException e) {
+            logger.error("Failed to retrieve or validate Token credentials", e);
+            return Optional.empty();
+        }
 	}
 
 	public boolean isSupportGetRequest() {
@@ -95,6 +122,10 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 
 	public String getSignatureParamName() {
 		return signatureParamName;
+	}
+	
+	public String getLoginUrl() {
+		return loginUrl;
 	}
 
 }

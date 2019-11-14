@@ -17,8 +17,10 @@ package org.pac4j.core.ext.client;
 
 import java.util.Optional;
 
-import org.pac4j.core.client.IndirectClient;
+import org.pac4j.core.client.DirectClient;
+import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.TokenCredentials;
+import org.pac4j.core.exception.CredentialsException;
 import org.pac4j.core.exception.http.RedirectionActionHelper;
 import org.pac4j.core.ext.credentials.authenticator.TokenAuthenticator;
 import org.pac4j.core.ext.credentials.extractor.TokenParameterExtractor;
@@ -28,14 +30,18 @@ import org.pac4j.core.ext.profile.creator.TokenProfileCreator;
 import org.pac4j.core.profile.creator.ProfileCreator;
 import org.pac4j.core.util.CommonHelper;
 
-public abstract class TokenClient<P extends TokenProfile, T extends Token> extends IndirectClient<TokenCredentials> {
+public abstract class TokenClient<P extends TokenProfile, T extends Token> extends DirectClient<TokenCredentials> {
 
 	private String parameterName = "";
 	
 	private boolean supportGetRequest = false;
 	
 	private boolean supportPostRequest = true;
-
+	/** 
+	 * The location of the client login URL, i.e. https://localhost:8080/myapp/login 
+	 */
+	private String loginUrl;
+	
 	public TokenClient() {
 	}
 
@@ -54,12 +60,33 @@ public abstract class TokenClient<P extends TokenProfile, T extends Token> exten
 	
 	@Override
 	protected void clientInit() {
-		defaultRedirectionActionBuilder(webContext -> Optional.of(RedirectionActionHelper.buildRedirectUrlAction(webContext, computeFinalCallbackUrl(webContext))));
 		defaultProfileCreator(new TokenProfileCreator());
 		defaultCredentialsExtractor(new TokenParameterExtractor(this.getParameterName(), this.isSupportGetRequest(), this.isSupportPostRequest()));
-		CommonHelper.assertNotNull("tokenAuthenticator", getAuthenticator());
+		
+		// ensures components have been properly initialized
+        CommonHelper.assertNotNull("credentialsExtractor", getCredentialsExtractor());
+        CommonHelper.assertNotNull("authenticator", getAuthenticator());
+        CommonHelper.assertNotNull("profileCreator", getProfileCreator());
 	}
 
+	@Override
+	protected Optional<TokenCredentials> retrieveCredentials(WebContext context) {
+		init();
+        try {
+            final Optional<TokenCredentials> credentials = super.retrieveCredentials(context);
+            if (!credentials.isPresent()) {
+                // redirect to the login page
+                logger.debug("redirectionUrl: {}", getLoginUrl());
+                throw RedirectionActionHelper.buildRedirectUrlAction(context, getLoginUrl());
+            }
+
+            return credentials;
+        } catch (CredentialsException e) {
+            logger.error("Failed to retrieve or validate Token credentials", e);
+            return Optional.empty();
+        }
+	}
+	
 	public String getParameterName() {
 		return parameterName;
 	}
@@ -84,4 +111,7 @@ public abstract class TokenClient<P extends TokenProfile, T extends Token> exten
 		this.supportPostRequest = supportPostRequest;
 	}
 	
+	public String getLoginUrl() {
+		return loginUrl;
+	}
 }
