@@ -15,11 +15,11 @@
  */
 package org.pac4j.core.ext.credentials;
 
-import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.pac4j.core.ext.Pac4jExtConstants;
 import org.pac4j.core.util.CommonHelper;
+import org.pac4j.core.util.Pac4jConstants;
 
 /**
  * TODO

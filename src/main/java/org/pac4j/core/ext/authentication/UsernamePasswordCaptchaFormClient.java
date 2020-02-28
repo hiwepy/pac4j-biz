@@ -19,7 +19,6 @@ import java.util.Optional;
 
 import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.context.HttpConstants;
-import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
@@ -31,6 +30,7 @@ import org.pac4j.core.ext.credentials.UsernamePasswordCaptchaCredentials;
 import org.pac4j.core.ext.credentials.extractor.UsernamePasswordCaptchaCredentialsExtractor;
 import org.pac4j.core.profile.creator.ProfileCreator;
 import org.pac4j.core.util.CommonHelper;
+import org.pac4j.core.util.Pac4jConstants;
 
 /**
  * TODO

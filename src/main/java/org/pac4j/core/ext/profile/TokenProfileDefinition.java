@@ -15,11 +15,10 @@
  */
 package org.pac4j.core.ext.profile;
 
-import java.util.function.Function;
-
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.definition.CommonProfileDefinition;
+import org.pac4j.core.profile.factory.ProfileFactory;
 
 /**
  * Token profile definition.
@@ -31,7 +30,7 @@ public abstract class TokenProfileDefinition<P extends TokenProfile, T extends T
         super();
     }
 
-    public TokenProfileDefinition(final Function<Object[], P> profileFactory) {
+    public TokenProfileDefinition(ProfileFactory<P> profileFactory) {
         super(profileFactory);
     }
     

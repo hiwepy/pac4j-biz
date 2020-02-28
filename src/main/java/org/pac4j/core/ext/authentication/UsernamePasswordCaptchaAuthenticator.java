@@ -16,7 +16,6 @@
 package org.pac4j.core.ext.authentication;
 
 import org.apache.commons.lang3.StringUtils;
-import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
@@ -28,6 +27,7 @@ import org.pac4j.core.ext.exception.CaptchaNotFoundException;
 import org.pac4j.core.ext.exception.OverRetryRemindException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.CommonHelper;
+import org.pac4j.core.util.Pac4jConstants;
 
 /**
  * TODO

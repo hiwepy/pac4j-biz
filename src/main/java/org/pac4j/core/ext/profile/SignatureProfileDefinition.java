@@ -15,10 +15,9 @@
  */
 package org.pac4j.core.ext.profile;
 
-import java.util.function.Function;
-
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.definition.CommonProfileDefinition;
+import org.pac4j.core.profile.factory.ProfileFactory;
 
 /**
  * Signature profile definition.
@@ -29,7 +28,7 @@ public abstract class SignatureProfileDefinition<P extends SignatureProfile, T e
         super();
     }
 
-    public SignatureProfileDefinition(final Function<Object[], P> profileFactory) {
+    public SignatureProfileDefinition(ProfileFactory<P> profileFactory) {
         super(profileFactory);
     }
     

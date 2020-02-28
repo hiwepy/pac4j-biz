@@ -17,7 +17,6 @@ package org.pac4j.core.ext.credentials.extractor;
 
 import java.util.Optional;
 
-import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.extractor.CredentialsExtractor;
 import org.pac4j.core.ext.Pac4jExtConstants;
@@ -26,6 +25,7 @@ import org.pac4j.core.ext.credentials.UsernamePasswordCaptchaCredentials;
 import org.pac4j.core.ext.exception.MethodNotSupportedException;
 import org.pac4j.core.ext.utils.WebUtils;
 import org.pac4j.core.util.CommonHelper;
+import org.pac4j.core.util.Pac4jConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
