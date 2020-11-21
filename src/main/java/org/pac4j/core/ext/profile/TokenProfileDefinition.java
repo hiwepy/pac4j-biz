@@ -36,7 +36,7 @@ public abstract class TokenProfileDefinition<P extends TokenProfile, T extends T
     
     /**
      * Retrieve the url of the profile of the authenticated user for the provider.
-     *
+     * @param context the WebContext
      * @param accessToken only used when constructing dynamic urls from data in the token
      * @return the url of the user profile given by the provider
      */

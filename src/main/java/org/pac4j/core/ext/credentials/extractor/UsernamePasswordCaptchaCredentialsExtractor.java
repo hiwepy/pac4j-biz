@@ -31,10 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
-/**
- * TODO
- * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
- */
 public class UsernamePasswordCaptchaCredentialsExtractor implements CredentialsExtractor<UsernamePasswordCaptchaCredentials> {
 	
 	// =====================================================================================
@@ -122,6 +118,7 @@ public class UsernamePasswordCaptchaCredentialsExtractor implements CredentialsE
 	 * authentication.
 	 * <p>
 	 * Defaults to <tt>true</tt> but may be overridden by subclasses.
+	 * @param postOnly if post only
 	 */
 	public void setPostOnly(boolean postOnly) {
 		this.postOnly = postOnly;

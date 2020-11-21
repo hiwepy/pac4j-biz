@@ -43,10 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
-/**
- * TODO
- * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
- */
 public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token>
 	extends TokenProfileDefinitionAware<P, T>  implements Authenticator<TokenCredentials> {
 	
@@ -110,7 +106,7 @@ public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token
      * Retrieve the user profile from the access token.
      *
      * @param context the web context
-     * @param accessToken the access token
+     * @param credentials the credentials
      * @return the user profile
      */
     protected Optional<P> retrieveUserProfileFromToken(final WebContext context, final TokenCredentials credentials) {
@@ -141,7 +137,6 @@ public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token
     * @param context the web context
      * @param accessToken the access token
      * @param profileUrl  url of the data
-     * @param verb        method used to request data
      * @return the response body
      */
     protected String retrieveUserProfileFromRestApi(final WebContext context, final T accessToken, final String profileUrl) {

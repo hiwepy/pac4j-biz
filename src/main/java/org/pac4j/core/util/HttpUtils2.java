@@ -41,12 +41,6 @@ public class HttpUtils2 {
 		return builder.toString();
 	}
 	
-	/**
-	 * 在一次请求发送后获取SessionID
-	 * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
-	 * @param httpConn HttpURLConnection对象
-	 * @return
-	 */
 	public static String getSessionID(HttpURLConnection httpConn){
 		// Get Session ID
 		String key = "";

@@ -38,7 +38,7 @@ public abstract class SignatureProfileDefinition<P extends SignatureProfile, T e
      * @param body the response body
      * @return the returned profile
      */
-    public abstract P extractUserProfile(String payload, String signature);
+    public abstract P extractUserProfile(String body, String signature);
     
     /**
      * Throws a {@link TechnicalException} to indicate that user profile extraction has failed.

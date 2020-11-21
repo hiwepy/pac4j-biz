@@ -24,6 +24,7 @@ public interface CaptchaResolver {
 	/**
 	 * Valid the current captcha via the given request.
 	 * @param context request to be used for resolution
+	 * @param capText the captcha text
 	 * @return the result
 	 */
 	boolean validCaptcha(WebContext context, String capText);
@@ -32,6 +33,7 @@ public interface CaptchaResolver {
 	 * Set the current captcha to the given one.
 	 * @param context request to be used for captcha modification
 	 * @param capText the new captcha value
+	 * @param capDate the captcha date
 	 * @throws UnsupportedOperationException if the CaptchaResolver implementation does not support dynamic changing of the captcha
 	 */
 	void setCaptcha(WebContext context, String capText, Date capDate);
