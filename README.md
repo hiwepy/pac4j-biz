@@ -1,15 +1,15 @@
-# pac4j-oauth-ext
+# pac4j-biz
 
 ### 说明
 
- > 基于 pac4j-oauth 的扩展
+ > 基于 pac4j-core 的扩展
 
 ### Maven
 
 ``` xml
 <dependency>
 	<groupId>com.github.hiwepy</groupId>
-	<artifactId>pac4j-oauth-ext</artifactId>
+	<artifactId>pac4j-biz</artifactId>
 	<version>${project.version}</version>
 </dependency>
 ```
