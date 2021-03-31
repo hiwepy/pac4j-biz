@@ -17,45 +17,21 @@ package org.pac4j.core.ext;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.authorization.authorizer.ProfileAuthorizer;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.exception.http.HttpAction;
-import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.profile.UserProfile;
 
-public class Pac4jExternalAuthorizer extends ProfileAuthorizer<CommonProfile> {
+public class Pac4jExternalAuthorizer extends ProfileAuthorizer {
 
-    @Override
-    public boolean isAuthorized(final WebContext context, final List<CommonProfile> profiles) throws HttpAction {
-        return isAnyAuthorized(context, profiles);
-    }
+	@Override
+	public boolean isAuthorized(WebContext context, SessionStore sessionStore, List<UserProfile> profiles) {
+		return isAnyAuthorized(context, sessionStore, profiles);
+	}
 
-    @Override
-    public boolean isProfileAuthorized(final WebContext context, final CommonProfile profile) {
-        if (profile == null) {
-            return false;
-        }
-        /*context.getFullRequestURL()
-        context.getPath()
-        context.getRemoteAddr()
-        context.getRequestAttribute(name)
-        context.getRequestContent()
-        context.getRequestCookies()
-        context.getRequestHeader(name)
-        context.getRequestMethod()
-        context.getRequestParameter(name)
-        context.getRequestParameters()
-        context.getScheme()
-        context.getServerName()
-        context.getServerPort()
-        context.getSessionAttribute(name)
-        context.getSessionIdentifier()
-        
-        profile.getPermissions()
-        profile.getRoles()
-        */
-        
-        return StringUtils.startsWith(profile.getUsername(), "jle");
-    }
+	@Override
+	protected boolean isProfileAuthorized(WebContext context, SessionStore sessionStore, UserProfile profile) {
+		return false;
+	}
 
 }

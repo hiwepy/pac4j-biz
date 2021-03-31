@@ -18,6 +18,8 @@ package org.pac4j.core.ext.credentials.extractor;
 import java.util.Optional;
 
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.extractor.CredentialsExtractor;
 import org.pac4j.core.ext.Pac4jExtConstants;
 import org.pac4j.core.ext.authentication.AuthenticationRequest;
@@ -31,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class UsernamePasswordCaptchaCredentialsExtractor implements CredentialsExtractor<UsernamePasswordCaptchaCredentials> {
+public class UsernamePasswordCaptchaCredentialsExtractor implements CredentialsExtractor {
 	
 	// =====================================================================================
 	private static Logger logger = LoggerFactory.getLogger(UsernamePasswordCaptchaCredentialsExtractor.class);
@@ -50,7 +52,7 @@ public class UsernamePasswordCaptchaCredentialsExtractor implements CredentialsE
 	}
 
 	@Override
-    public Optional<UsernamePasswordCaptchaCredentials> extract(WebContext context) {
+    public Optional<Credentials> extract(WebContext context, SessionStore sessionStore) {
     	
     	if (isPostOnly() && ! WebUtils.isPostRequest(context)) {
 			if (logger.isDebugEnabled()) {

@@ -18,16 +18,17 @@ package org.pac4j.core.ext.authentication.captcha;
 import java.util.Date;
 
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
 
 public class NullCaptchaResolver implements CaptchaResolver {
 
 	@Override
-	public boolean validCaptcha(WebContext context, String capText) {
+	public boolean validCaptcha(WebContext context, SessionStore sessionStore, String capText) {
 		return true;
 	}
 
 	@Override
-	public void setCaptcha(WebContext context, String capText, Date capDate) {
+	public void setCaptcha(WebContext context, SessionStore sessionStore, String capText, Date capDate) {
 
 	}
 

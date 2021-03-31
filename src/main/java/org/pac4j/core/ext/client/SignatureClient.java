@@ -16,13 +16,8 @@
 package org.pac4j.core.ext.client;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import org.pac4j.core.client.DirectClient;
-import org.pac4j.core.context.WebContext;
-import org.pac4j.core.credentials.extractor.CredentialsExtractor;
-import org.pac4j.core.exception.CredentialsException;
-import org.pac4j.core.exception.http.RedirectionActionHelper;
 import org.pac4j.core.ext.Pac4jExtConstants;
 import org.pac4j.core.ext.credentials.SignatureCredentials;
 import org.pac4j.core.ext.credentials.authenticator.SignatureAuthenticator;
@@ -33,9 +28,8 @@ import org.pac4j.core.ext.profile.creator.SignatureProfileCreator;
 import org.pac4j.core.profile.creator.ProfileCreator;
 import org.pac4j.core.util.CommonHelper;
 
-@SuppressWarnings("unchecked")
 public abstract class SignatureClient<C extends SignatureCredentials, P extends SignatureProfile, T extends Signature>
-		extends DirectClient<C> {
+		extends DirectClient {
 	
 	private String signatureParamName = Pac4jExtConstants.SIGNATURE_PARAM;
 	
@@ -60,40 +54,22 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 	}
 
 	public SignatureClient(final String signatureParamName,
-			final SignatureAuthenticator<C, P, T> tokenAuthenticator, final ProfileCreator<C> profileCreator) {
+			final SignatureAuthenticator<C, P, T> tokenAuthenticator, final ProfileCreator profileCreator) {
 		this.signatureParamName = signatureParamName;
 		defaultAuthenticator(tokenAuthenticator);
 		defaultProfileCreator(profileCreator);
 	}
 
 	@Override
-	protected void clientInit() {
-		defaultProfileCreator(new SignatureProfileCreator<C>());
-		defaultCredentialsExtractor((CredentialsExtractor<C>) new SignatureParameterExtractor(
+	protected void internalInit() {
+		defaultProfileCreator(new SignatureProfileCreator());
+		defaultCredentialsExtractor(new SignatureParameterExtractor(
 				this.getSignatureParamName(), this.isSupportGetRequest(),
 				this.isSupportPostRequest(), this.getCharset()));
 		// ensures components have been properly initialized
         CommonHelper.assertNotNull("credentialsExtractor", getCredentialsExtractor());
         CommonHelper.assertNotNull("authenticator", getAuthenticator());
         CommonHelper.assertNotNull("profileCreator", getProfileCreator());
-	}
-	
-	@Override
-	protected Optional<C> retrieveCredentials(WebContext context) {
-		init();
-        try {
-            final Optional<C> credentials = super.retrieveCredentials(context);
-            if (!credentials.isPresent()) {
-                // redirect to the login page
-                logger.debug("redirectionUrl: {}", getLoginUrl());
-                throw RedirectionActionHelper.buildRedirectUrlAction(context, getLoginUrl());
-            }
-
-            return credentials;
-        } catch (CredentialsException e) {
-            logger.error("Failed to retrieve or validate Token credentials", e);
-            return Optional.empty();
-        }
 	}
 
 	public boolean isSupportGetRequest() {

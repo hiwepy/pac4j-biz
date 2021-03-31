@@ -18,7 +18,8 @@ package org.pac4j.core.ext.profile.creator;
 import java.util.Optional;
 
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.ext.credentials.SignatureCredentials;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.profile.creator.ProfileCreator;
 
@@ -26,10 +27,12 @@ import org.pac4j.core.profile.creator.ProfileCreator;
  * Signature profile creator.
  * @author 		： <a href="https://github.com/hiwepy">wandl</a>
  */
-public class SignatureProfileCreator<C extends SignatureCredentials> implements ProfileCreator<C> {
+public class SignatureProfileCreator implements ProfileCreator {
     
+	public final static SignatureProfileCreator INSTANCE = new SignatureProfileCreator();
+
     @Override
-    public Optional<UserProfile> create(final C credentials, final WebContext context) {
+    public Optional<UserProfile> create(final Credentials credentials, final WebContext context, final SessionStore sessionStore) {
         return Optional.ofNullable(credentials.getUserProfile());
     }
 	

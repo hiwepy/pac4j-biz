@@ -23,14 +23,14 @@ import org.pac4j.core.profile.factory.ProfileFactory;
 /**
  * Token profile definition.
  */
-public abstract class TokenProfileDefinition<P extends TokenProfile, T extends Token> extends CommonProfileDefinition<P> {
+public abstract class TokenProfileDefinition<P extends TokenProfile, T extends Token> extends CommonProfileDefinition {
 
 	
     public TokenProfileDefinition() {
         super();
     }
 
-    public TokenProfileDefinition(ProfileFactory<P> profileFactory) {
+    public TokenProfileDefinition(ProfileFactory profileFactory) {
         super(profileFactory);
     }
     

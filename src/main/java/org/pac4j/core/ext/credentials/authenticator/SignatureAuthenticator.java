@@ -19,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
 import org.pac4j.core.ext.credentials.SignatureCredentials;
@@ -34,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
  */
 public abstract class SignatureAuthenticator<C extends SignatureCredentials, P extends SignatureProfile, T extends Signature>
-	extends SignatureProfileDefinitionAware<P, T>  implements Authenticator<C> {
+	extends SignatureProfileDefinitionAware<P, T>  implements Authenticator {
 	
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
     private String charset = StandardCharsets.UTF_8.name();
@@ -48,18 +50,19 @@ public abstract class SignatureAuthenticator<C extends SignatureCredentials, P e
     }
 	
 	@Override
-    public void validate(final C credentials, final WebContext context) {
+    public void validate(Credentials credentials, WebContext context, SessionStore sessionStore) {
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
         }
         
-        String payload = credentials.getPayload();
+    	SignatureCredentials signatureCredentials = (SignatureCredentials) credentials;
+        String payload = signatureCredentials.getPayload();
         if (CommonHelper.isBlank(payload)) {
             throw new CredentialsException("Payload cannot be blank");
         }
 
-        final Optional<P> profile = Optional.of(getProfileDefinition().extractUserProfile(payload, credentials.getSignature()));
+        final Optional<P> profile = Optional.of(getProfileDefinition().extractUserProfile(payload, signatureCredentials.getSignature()));
         
         logger.debug("profile: {}", profile.get());
         credentials.setUserProfile(profile.get());

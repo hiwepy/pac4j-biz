@@ -20,8 +20,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import org.pac4j.core.context.ContextHelper;
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.WebContextHelper;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.TokenCredentials;
 import org.pac4j.core.credentials.extractor.ParameterExtractor;
 import org.pac4j.core.exception.CredentialsException;
@@ -64,14 +66,14 @@ public class TokenParameterExtractor extends ParameterExtractor {
 	
 	
 	@Override
-    public Optional<TokenCredentials> extract(WebContext context) {
+	public Optional<Credentials> extract(WebContext context, SessionStore sessionStore) {
 		
 		logger.debug("supportGetRequest: {}", this.supportGetRequest);
 		logger.debug("supportPostRequest: {}", this.supportPostRequest);
 		
-        if (ContextHelper.isGet(context) && ! supportGetRequest) {
+		if (WebContextHelper.isGet(context) && !supportGetRequest) {
             throw new CredentialsException("GET requests not supported");
-        } else if (ContextHelper.isPost(context) && !supportPostRequest) {
+        } else if (WebContextHelper.isPost(context) && !supportPostRequest) {
             throw new CredentialsException("POST requests not supported");
         }
 

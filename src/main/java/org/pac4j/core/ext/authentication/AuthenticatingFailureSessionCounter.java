@@ -16,12 +16,13 @@
 package org.pac4j.core.ext.authentication;
 
 import org.pac4j.core.context.WebContext;
-@SuppressWarnings("unchecked")
+import org.pac4j.core.context.session.SessionStore;
+
 public class AuthenticatingFailureSessionCounter implements AuthenticatingFailureCounter {
 	
 	@Override
-	public int get(WebContext context, String retryTimesKeyAttribute) {
-		Object count = context.getSessionStore().get(context, retryTimesKeyAttribute);
+	public int get(WebContext context, SessionStore sessionStore, String retryTimesKeyAttribute) {
+		Object count = sessionStore.get(context, retryTimesKeyAttribute);
 		if (null != count) {
 			return Integer.parseInt(String.valueOf(count));
 		}
@@ -29,12 +30,12 @@ public class AuthenticatingFailureSessionCounter implements AuthenticatingFailur
 	}
 
 	@Override
-	public void increment(WebContext context, String retryTimesKeyAttribute) {
-		Object count = context.getSessionStore().get(context, retryTimesKeyAttribute);
+	public void increment(WebContext context, SessionStore sessionStore, String retryTimesKeyAttribute) {
+		Object count = sessionStore.get(context, retryTimesKeyAttribute);
 		if (null == count) {
-			context.getSessionStore().set(context, retryTimesKeyAttribute, 1);
+			sessionStore.set(context, retryTimesKeyAttribute, 1);
 		} else {
-			context.getSessionStore().set(context, retryTimesKeyAttribute,
+			sessionStore.set(context, retryTimesKeyAttribute,
 					Long.parseLong(String.valueOf(count)) + 1);
 		}
 	}

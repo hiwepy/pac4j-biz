@@ -22,13 +22,13 @@ import org.pac4j.core.profile.factory.ProfileFactory;
 /**
  * Signature profile definition.
  */
-public abstract class SignatureProfileDefinition<P extends SignatureProfile, T extends Signature> extends CommonProfileDefinition<P> {
+public abstract class SignatureProfileDefinition<P extends SignatureProfile, T extends Signature> extends CommonProfileDefinition {
 
     public SignatureProfileDefinition() {
         super();
     }
 
-    public SignatureProfileDefinition(ProfileFactory<P> profileFactory) {
+    public SignatureProfileDefinition(ProfileFactory profileFactory) {
         super(profileFactory);
     }
     

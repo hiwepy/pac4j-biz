@@ -17,6 +17,8 @@ package org.pac4j.core.ext.authentication;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
 import org.pac4j.core.ext.Pac4jExtConstants;
@@ -33,7 +35,7 @@ import org.pac4j.core.util.Pac4jConstants;
  * TODO
  * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
  */
-public class UsernamePasswordCaptchaAuthenticator implements Authenticator<UsernamePasswordCaptchaCredentials> {
+public class UsernamePasswordCaptchaAuthenticator implements Authenticator {
 
 	private boolean captchaRequired = false;
 	private CaptchaResolver captchaResolver;
@@ -50,14 +52,16 @@ public class UsernamePasswordCaptchaAuthenticator implements Authenticator<Usern
 	}
 
 	@Override
-    public void validate(final UsernamePasswordCaptchaCredentials credentials, final WebContext context) {
+    public void validate(Credentials credentials, WebContext context, SessionStore sessionStore){
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
         }
         
-        String username = credentials.getUsername();
-        String password = credentials.getPassword();
+    	UsernamePasswordCaptchaCredentials upcCredentials = (UsernamePasswordCaptchaCredentials) credentials;
+    	
+        String username = upcCredentials.getUsername();
+        String password = upcCredentials.getPassword();
         if (CommonHelper.isBlank(username)) {
             throw new CredentialsException("Username cannot be blank");
         }
@@ -70,19 +74,19 @@ public class UsernamePasswordCaptchaAuthenticator implements Authenticator<Usern
         }
         
     	// The retry limit has been exceeded and a reminder is required
-        if(isOverRetryRemind(context)) {
+        if(isOverRetryRemind(context, sessionStore)) {
         	throw new OverRetryRemindException("The number of login errors exceeds the maximum retry limit and a verification code is required.");
         }
         
         // 验证码必填或者错误次数超出系统限制，则要求填入验证码
- 		if(isCaptchaRequired() || isOverRetryTimes(context)) {
+ 		if(isCaptchaRequired() || isOverRetryTimes(context, sessionStore)) {
  			
- 			if(StringUtils.isBlank(credentials.getCaptcha())) {
+ 			if(StringUtils.isBlank(upcCredentials.getCaptcha())) {
 				throw new CaptchaNotFoundException("Captcha not provided");
 			}
  			
  	        // 进行验证	
-	        boolean validation = captchaResolver.validCaptcha(context, credentials.getCaptcha());
+	        boolean validation = captchaResolver.validCaptcha(context, sessionStore, upcCredentials.getCaptcha());
 			if (!validation) {
 				throw new CaptchaIncorrectException("Captcha validation failed!");
 			}
@@ -92,7 +96,7 @@ public class UsernamePasswordCaptchaAuthenticator implements Authenticator<Usern
         final CommonProfile profile = new CommonProfile();
         profile.setId(username);
         profile.addAttribute(Pac4jConstants.USERNAME, username);
-        profile.addAttribute(Pac4jExtConstants.CAPTCHA, credentials.getCaptcha());
+        profile.addAttribute(Pac4jExtConstants.CAPTCHA, upcCredentials.getCaptcha());
         
         credentials.setUserProfile(profile);
     }
@@ -136,15 +140,15 @@ public class UsernamePasswordCaptchaAuthenticator implements Authenticator<Usern
 		this.retryTimesWhenAccessDenied = retryTimesWhenAccessDenied;
 	}
 	
-	protected boolean isOverRetryRemind(WebContext context) {
-		if (null != getFailureCounter() && getFailureCounter().get(context, getRetryTimesKeyAttribute()) == getRetryTimesWhenAccessDenied()) {
+	protected boolean isOverRetryRemind(WebContext context, SessionStore sessionStore) {
+		if (null != getFailureCounter() && getFailureCounter().get(context, sessionStore, getRetryTimesKeyAttribute()) == getRetryTimesWhenAccessDenied()) {
 			return true;
 		}
 		return false;
 	}
 	
-	protected boolean isOverRetryTimes(WebContext context) {
-		if (null != getFailureCounter() && getFailureCounter().get(context, getRetryTimesKeyAttribute()) >= getRetryTimesWhenAccessDenied()) {
+	protected boolean isOverRetryTimes(WebContext context, SessionStore sessionStore) {
+		if (null != getFailureCounter() && getFailureCounter().get(context, sessionStore, getRetryTimesKeyAttribute()) >= getRetryTimesWhenAccessDenied()) {
 			return true;
 		}
 		return false;

@@ -18,7 +18,8 @@ package org.pac4j.core.ext.profile.creator;
 import java.util.Optional;
 
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.credentials.TokenCredentials;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.profile.creator.ProfileCreator;
 
@@ -26,10 +27,12 @@ import org.pac4j.core.profile.creator.ProfileCreator;
  * Token profile creator.
  * @author 		： <a href="https://github.com/hiwepy">wandl</a>
  */
-public class TokenProfileCreator implements ProfileCreator<TokenCredentials> {
+public class TokenProfileCreator implements ProfileCreator {
     
-    @Override
-    public Optional<UserProfile> create(final TokenCredentials credentials, final WebContext context) {
+	public final static TokenProfileCreator INSTANCE = new TokenProfileCreator();
+	
+	@Override
+    public Optional<UserProfile> create(final Credentials credentials, final WebContext context, final SessionStore sessionStore) {
         return Optional.ofNullable(credentials.getUserProfile());
     }
 	

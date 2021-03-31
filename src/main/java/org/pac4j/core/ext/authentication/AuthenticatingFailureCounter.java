@@ -16,11 +16,12 @@
 package org.pac4j.core.ext.authentication;
 
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
 
 public interface AuthenticatingFailureCounter {
 
-	int get(WebContext context, String retryTimesKeyAttribute);
+	int get(WebContext context, SessionStore sessionStore, String retryTimesKeyAttribute);
 	
-	void increment(WebContext context, String retryTimesKeyAttribute);
+	void increment(WebContext context, SessionStore sessionStore, String retryTimesKeyAttribute);
 	
 }

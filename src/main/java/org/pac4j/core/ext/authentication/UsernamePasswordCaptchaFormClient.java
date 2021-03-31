@@ -20,13 +20,14 @@ import java.util.Optional;
 import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
 import org.pac4j.core.exception.http.FoundAction;
 import org.pac4j.core.exception.http.HttpAction;
 import org.pac4j.core.exception.http.StatusAction;
 import org.pac4j.core.ext.Pac4jExtConstants;
-import org.pac4j.core.ext.credentials.UsernamePasswordCaptchaCredentials;
 import org.pac4j.core.ext.credentials.extractor.UsernamePasswordCaptchaCredentialsExtractor;
 import org.pac4j.core.profile.creator.ProfileCreator;
 import org.pac4j.core.util.CommonHelper;
@@ -37,7 +38,7 @@ import org.pac4j.core.util.Pac4jConstants;
  * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class UsernamePasswordCaptchaFormClient extends IndirectClient<UsernamePasswordCaptchaCredentials> {
+public class UsernamePasswordCaptchaFormClient extends IndirectClient {
 
     private String loginUrl;
 
@@ -80,14 +81,14 @@ public class UsernamePasswordCaptchaFormClient extends IndirectClient<UsernamePa
     }
 
     @Override
-    protected void clientInit() {
+    protected void internalInit() {
         CommonHelper.assertNotBlank("loginUrl", this.loginUrl);
         CommonHelper.assertNotBlank("usernameParameter", this.usernameParameter);
         CommonHelper.assertNotBlank("passwordParameter", this.passwordParameter);
         CommonHelper.assertNotBlank("captchaParameter", this.captchaParameter);
         
-        defaultRedirectionActionBuilder(ctx -> {
-            final String finalLoginUrl = getUrlResolver().compute(this.loginUrl, ctx);
+        defaultRedirectionActionBuilder((context, sessionStore) -> {
+            final String finalLoginUrl = getUrlResolver().compute(this.loginUrl, context);
             //return RedirectionAction.redirect(finalLoginUrl);
             return null;
         });
@@ -96,33 +97,32 @@ public class UsernamePasswordCaptchaFormClient extends IndirectClient<UsernamePa
     }
 
     @Override
-    protected Optional<UsernamePasswordCaptchaCredentials> retrieveCredentials(final WebContext context) {
+    protected Optional<Credentials> retrieveCredentials(final WebContext context, SessionStore sessionStore) {
         CommonHelper.assertNotNull("credentialsExtractor", getCredentialsExtractor());
         CommonHelper.assertNotNull("authenticator", getAuthenticator());
 
         final Optional<String> username = context.getRequestParameter(this.usernameParameter);
-        Optional<UsernamePasswordCaptchaCredentials> credentials;
+        Optional<Credentials> credentials;
         try {
             // retrieve credentials
-            credentials = getCredentialsExtractor().extract(context);
+            credentials = getCredentialsExtractor().extract(context, sessionStore);
             logger.debug("usernamePasswordCredentials: {}", credentials);
             if (credentials == null) {
-                throw handleInvalidCredentials(context, username, "Username and password cannot be blank -> return to the form with error",
+                throw handleInvalidCredentials(context, sessionStore, username, "Username and password cannot be blank -> return to the form with error",
                     MISSING_FIELD_ERROR);
             }
             // validate credentials
-            getAuthenticator().validate(credentials.get(), context);
+            getAuthenticator().validate(credentials.get(), context, sessionStore);
         } catch (final CredentialsException e) {
-            throw handleInvalidCredentials(context, username, "Credentials validation fails -> return to the form with error",
+            throw handleInvalidCredentials(context, sessionStore, username, "Credentials validation fails -> return to the form with error",
                 computeErrorMessage(e));
         }
-
         return credentials;
     }
 
-    protected HttpAction handleInvalidCredentials(final WebContext context, final Optional<String> username, String message, String errorMessage) {
+    protected HttpAction handleInvalidCredentials(final WebContext context, SessionStore sessionStore, final Optional<String> username, String message, String errorMessage) {
         // it's an AJAX request -> unauthorized (instead of a redirection)
-        if (getAjaxRequestResolver().isAjax(context)) {
+        if (getAjaxRequestResolver().isAjax(context, sessionStore)) {
             logger.info("AJAX request detected -> returning 401");
             return new StatusAction(HttpConstants.UNAUTHORIZED);
         } else {
@@ -190,4 +190,5 @@ public class UsernamePasswordCaptchaFormClient extends IndirectClient<UsernamePa
                 "redirectActionBuilder", getRedirectionActionBuilder(), "extractor", getCredentialsExtractor(),
                 "authenticator", getAuthenticator(), "profileCreator", getProfileCreator());
     }
+ 
 }

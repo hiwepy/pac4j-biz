@@ -20,8 +20,8 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
 
-@SuppressWarnings("unchecked")
 public class SessionCaptchaResolver implements CaptchaResolver {
 
 	/**
@@ -35,12 +35,12 @@ public class SessionCaptchaResolver implements CaptchaResolver {
 	private String sessionKeyDateValue = KAPTCHA_DATE_SESSION_ATTRIBUTE_NAME;
 	
 	@Override
-	public boolean validCaptcha(WebContext context, String capText) {
+	public boolean validCaptcha(WebContext context, SessionStore sessionStore, String capText) {
 		if(StringUtils.isEmpty(capText)){
 			return false;
 		}
 		
-		Optional<Object> sessionCapText = context.getSessionStore().get(context, this.sessionKeyValue);
+		Optional<Object> sessionCapText = sessionStore.get(context, this.sessionKeyValue);
 		//String sessionCapDate = (String) WebUtils.getSessionAttribute(request, this.sessionKeyDateValue);
 		if (sessionCapText.isPresent()) {
 			return StringUtils.equalsIgnoreCase(String.valueOf(sessionCapText.get()), capText);
@@ -49,15 +49,15 @@ public class SessionCaptchaResolver implements CaptchaResolver {
 	}
 
 	@Override
-	public void setCaptcha(WebContext context, String capText, Date capDate) {
+	public void setCaptcha(WebContext context, SessionStore sessionStore, String capText, Date capDate) {
 		
 		// store the text in the session
-		context.getSessionStore().set(context, sessionKeyValue, (StringUtils.isNotEmpty(capText) ? capText : null));
+		sessionStore.set(context, sessionKeyValue, (StringUtils.isNotEmpty(capText) ? capText : null));
 
 		// store the date in the session so that it can be compared
 		// against to make sure someone hasn't taken too long to enter
 		// their kaptcha
-		context.getSessionStore().set(context, sessionKeyDateValue, (capDate != null ? capDate : new Date()) );
+		sessionStore.set(context, sessionKeyDateValue, (capDate != null ? capDate : new Date()) );
 
 	}
 

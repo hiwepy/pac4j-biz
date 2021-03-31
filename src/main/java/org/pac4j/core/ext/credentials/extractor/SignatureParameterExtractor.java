@@ -19,8 +19,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.pac4j.core.context.ContextHelper;
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.WebContextHelper;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.extractor.CredentialsExtractor;
 import org.pac4j.core.exception.CredentialsException;
 import org.pac4j.core.ext.Pac4jExtConstants;
@@ -29,7 +31,7 @@ import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SignatureParameterExtractor implements CredentialsExtractor<SignatureCredentials> {
+public class SignatureParameterExtractor implements CredentialsExtractor {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
@@ -58,14 +60,14 @@ public class SignatureParameterExtractor implements CredentialsExtractor<Signatu
 	}
 	
 	@Override
-    public Optional<SignatureCredentials> extract(WebContext context) {
+    public Optional<Credentials> extract(WebContext context, SessionStore sessionStore) {
 		
 		logger.debug("supportGetRequest: {}", this.supportGetRequest);
 		logger.debug("supportPostRequest: {}", this.supportPostRequest);
 		
-        if (ContextHelper.isGet(context) && ! supportGetRequest) {
+		if (WebContextHelper.isGet(context) && !supportGetRequest) {
             throw new CredentialsException("GET requests not supported");
-        } else if (ContextHelper.isPost(context) && !supportPostRequest) {
+        } else if (WebContextHelper.isPost(context) && !supportPostRequest) {
             throw new CredentialsException("POST requests not supported");
         }
         

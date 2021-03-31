@@ -26,6 +26,8 @@ import java.util.Optional;
 
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.TokenCredentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
@@ -44,7 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 
 public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token>
-	extends TokenProfileDefinitionAware<P, T>  implements Authenticator<TokenCredentials> {
+	extends TokenProfileDefinitionAware<P, T>  implements Authenticator {
 	
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0";
@@ -76,18 +78,19 @@ public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token
     }
 	
 	@Override
-    public void validate(final TokenCredentials credentials, final WebContext context) {
+    public void validate(Credentials credentials, WebContext context, SessionStore sessionStore) {
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
         }
         
-        String token = credentials.getToken();
+    	TokenCredentials tokenCredentials = (org.pac4j.core.credentials.TokenCredentials) credentials;
+        String token = tokenCredentials.getToken();
         if (CommonHelper.isBlank(token)) {
             throw new CredentialsException("Token cannot be blank");
         }
         
-        final Optional<P> profile = retrieveUserProfileFromToken(context , credentials);
+        final Optional<P> profile = retrieveUserProfileFromToken(context , tokenCredentials);
         
         logger.debug("profile: {}", profile.get());
         credentials.setUserProfile(profile.get());
