@@ -10,7 +10,7 @@
 <dependency>
 	<groupId>com.github.hiwepy</groupId>
 	<artifactId>pac4j-biz</artifactId>
-	<version>${project.version}</version>
+	<version>1.0.1.RELEASE</version>
 </dependency>
 ```
 
