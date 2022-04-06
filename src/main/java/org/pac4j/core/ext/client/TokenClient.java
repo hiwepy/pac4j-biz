@@ -53,7 +53,7 @@ public abstract class TokenClient<P extends TokenProfile, T extends Token> exten
     }
 	
 	@Override
-	protected void internalInit() {
+	protected void internalInit(final boolean forceReinit) {
 		defaultProfileCreator(new TokenProfileCreator());
 		defaultCredentialsExtractor(new TokenParameterExtractor(this.getParameterName(), this.isSupportGetRequest(), this.isSupportPostRequest()));
 		

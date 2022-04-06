@@ -72,7 +72,7 @@ public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token
 	}
 	
 	@Override
-    protected void internalInit() {
+    protected void internalInit(final boolean forceReinit) {
 		CommonHelper.assertNotNull("parameterName", parameterName);
 		CommonHelper.assertNotNull("profileDefinition", getProfileDefinition());
     }

@@ -81,7 +81,7 @@ public class UsernamePasswordCaptchaFormClient extends IndirectClient {
     }
 
     @Override
-    protected void internalInit() {
+    protected void internalInit(final boolean forceReinit) {
         CommonHelper.assertNotBlank("loginUrl", this.loginUrl);
         CommonHelper.assertNotBlank("usernameParameter", this.usernameParameter);
         CommonHelper.assertNotBlank("passwordParameter", this.passwordParameter);

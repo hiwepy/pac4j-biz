@@ -45,7 +45,7 @@ public abstract class SignatureAuthenticator<C extends SignatureCredentials, P e
 	}
 	
 	@Override
-    protected void internalInit() {
+    protected void internalInit(final boolean forceReinit) {
 		CommonHelper.assertNotNull("profileDefinition", getProfileDefinition());
     }
 	
