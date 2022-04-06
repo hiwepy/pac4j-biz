@@ -25,13 +25,13 @@ import org.pac4j.core.profile.UserProfile;
 public class Pac4jInternalAuthorizer extends ProfileAuthorizer {
 
 	@Override
-	public boolean isAuthorized(WebContext context, SessionStore sessionStore, List<UserProfile> profiles) {
-		return isAnyAuthorized(context, sessionStore, profiles);
+	protected boolean isProfileAuthorized(WebContext context, SessionStore sessionStore, UserProfile profile) {
+		return false;
 	}
 
 	@Override
-	protected boolean isProfileAuthorized(WebContext context, SessionStore sessionStore, UserProfile profile) {
-		return false;
+	public boolean isAuthorized(WebContext context, SessionStore sessionStore, List<UserProfile> profiles) {
+		return isAnyAuthorized(context, sessionStore, profiles);
 	}
 
 }

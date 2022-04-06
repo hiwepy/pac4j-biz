@@ -28,12 +28,11 @@ import org.pac4j.core.profile.creator.ProfileCreator;
  * @author 		： <a href="https://github.com/hiwepy">wandl</a>
  */
 public class TokenProfileCreator implements ProfileCreator {
-    
+
 	public final static TokenProfileCreator INSTANCE = new TokenProfileCreator();
-	
-	@Override
-    public Optional<UserProfile> create(final Credentials credentials, final WebContext context, final SessionStore sessionStore) {
+
+    @Override
+    public Optional<UserProfile> create(Credentials credentials, WebContext context, SessionStore sessionStore) {
         return Optional.ofNullable(credentials.getUserProfile());
     }
-	
 }
