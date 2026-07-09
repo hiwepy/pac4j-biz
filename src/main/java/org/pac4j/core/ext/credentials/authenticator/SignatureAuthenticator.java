@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
@@ -45,12 +44,12 @@ public abstract class SignatureAuthenticator<C extends SignatureCredentials, P e
 	}
 	
 	@Override
-    protected void internalInit(final boolean forceReinit) {
+    protected void internalInit() {
 		CommonHelper.assertNotNull("profileDefinition", getProfileDefinition());
     }
 	
 	@Override
-    public void validate(Credentials credentials, WebContext context, SessionStore sessionStore) {
+    public void validate(Credentials credentials, WebContext context) {
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");

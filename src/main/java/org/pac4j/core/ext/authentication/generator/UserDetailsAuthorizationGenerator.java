@@ -19,7 +19,6 @@ import java.util.Optional;
 
 import org.pac4j.core.authorization.generator.AuthorizationGenerator;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.ext.authentication.userdetails.UserDetailsService;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.UserProfile;
@@ -38,7 +37,7 @@ public class UserDetailsAuthorizationGenerator<U extends CommonProfile> implemen
 	}
 	
 	@Override
-    public Optional<UserProfile> generate(WebContext context, SessionStore sessionStore, UserProfile profile) {
+    public Optional<UserProfile> generate(WebContext context, UserProfile profile) {
 		UserDetails details = getDetailsService().loadUserDetails(context, profile);
         profile.addPermissions(details.getPermissions());
         profile.addRoles(details.getRoles());

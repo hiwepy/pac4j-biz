@@ -18,7 +18,6 @@ package org.pac4j.core.ext.profile.creator;
 import java.util.Optional;
 
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.profile.creator.ProfileCreator;
@@ -32,7 +31,7 @@ public class TokenProfileCreator implements ProfileCreator {
 	public final static TokenProfileCreator INSTANCE = new TokenProfileCreator();
 
     @Override
-    public Optional<UserProfile> create(Credentials credentials, WebContext context, SessionStore sessionStore) {
+    public Optional<UserProfile> create(Credentials credentials, WebContext context) {
         return Optional.ofNullable(credentials.getUserProfile());
     }
 }

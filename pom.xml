@@ -5,7 +5,7 @@
 	<groupId>io.github.hiwepy</groupId>
 	<artifactId>pac4j-biz</artifactId>
 	<description>Pac4j For Biz </description>
-	<version>2.0.0-SNAPSHOT</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<name>${project.groupId}:${project.artifactId}</name>
    	<url>https://github.com/hiwepy/${project.artifactId}</url>
 	<packaging>jar</packaging>
@@ -376,7 +376,7 @@
         <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 		<maven-nexus-staging-plugin.version>1.6.8</maven-nexus-staging-plugin.version>
-		<pac4j.version>5.4.0</pac4j.version>
+		<pac4j.version>4.5.7</pac4j.version>
 	</properties>
 
 	<dependencyManagement>

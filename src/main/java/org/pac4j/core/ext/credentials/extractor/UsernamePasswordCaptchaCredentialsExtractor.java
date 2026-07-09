@@ -18,7 +18,6 @@ package org.pac4j.core.ext.credentials.extractor;
 import java.util.Optional;
 
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.extractor.CredentialsExtractor;
 import org.pac4j.core.ext.Pac4jExtConstants;
@@ -52,7 +51,7 @@ public class UsernamePasswordCaptchaCredentialsExtractor implements CredentialsE
 	}
 
 	@Override
-    public Optional<Credentials> extract(WebContext context, SessionStore sessionStore) {
+    public Optional<Credentials> extract(WebContext context) {
     	
     	if (isPostOnly() && ! WebUtils.isPostRequest(context)) {
 			if (logger.isDebugEnabled()) {

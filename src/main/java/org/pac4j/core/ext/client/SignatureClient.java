@@ -61,7 +61,7 @@ public abstract class SignatureClient<C extends SignatureCredentials, P extends 
 	}
 
 	@Override
-	protected void internalInit(final boolean forceReinit) {
+	protected void clientInit() {
 		defaultProfileCreator(new SignatureProfileCreator());
 		defaultCredentialsExtractor(new SignatureParameterExtractor(
 				this.getSignatureParamName(), this.isSupportGetRequest(),

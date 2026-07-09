@@ -17,7 +17,6 @@ package org.pac4j.core.ext.authentication;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
@@ -52,7 +51,7 @@ public class UsernamePasswordCaptchaAuthenticator implements Authenticator {
 	}
 
 	@Override
-    public void validate(Credentials credentials, WebContext context, SessionStore sessionStore){
+    public void validate(Credentials credentials, WebContext context){
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
@@ -74,19 +73,19 @@ public class UsernamePasswordCaptchaAuthenticator implements Authenticator {
         }
         
     	// The retry limit has been exceeded and a reminder is required
-        if(isOverRetryRemind(context, sessionStore)) {
+        if(isOverRetryRemind(context)) {
         	throw new OverRetryRemindException("The number of login errors exceeds the maximum retry limit and a verification code is required.");
         }
         
         // 验证码必填或者错误次数超出系统限制，则要求填入验证码
- 		if(isCaptchaRequired() || isOverRetryTimes(context, sessionStore)) {
+ 		if(isCaptchaRequired() || isOverRetryTimes(context)) {
  			
  			if(StringUtils.isBlank(upcCredentials.getCaptcha())) {
 				throw new CaptchaNotFoundException("Captcha not provided");
 			}
  			
  	        // 进行验证	
-	        boolean validation = captchaResolver.validCaptcha(context, sessionStore, upcCredentials.getCaptcha());
+	        boolean validation = captchaResolver.validCaptcha(context, context.getSessionStore(), upcCredentials.getCaptcha());
 			if (!validation) {
 				throw new CaptchaIncorrectException("Captcha validation failed!");
 			}
@@ -140,15 +139,15 @@ public class UsernamePasswordCaptchaAuthenticator implements Authenticator {
 		this.retryTimesWhenAccessDenied = retryTimesWhenAccessDenied;
 	}
 	
-	protected boolean isOverRetryRemind(WebContext context, SessionStore sessionStore) {
-		if (null != getFailureCounter() && getFailureCounter().get(context, sessionStore, getRetryTimesKeyAttribute()) == getRetryTimesWhenAccessDenied()) {
+	protected boolean isOverRetryRemind(WebContext context) {
+		if (null != getFailureCounter() && getFailureCounter().get(context, context.getSessionStore(), getRetryTimesKeyAttribute()) == getRetryTimesWhenAccessDenied()) {
 			return true;
 		}
 		return false;
 	}
 	
-	protected boolean isOverRetryTimes(WebContext context, SessionStore sessionStore) {
-		if (null != getFailureCounter() && getFailureCounter().get(context, sessionStore, getRetryTimesKeyAttribute()) >= getRetryTimesWhenAccessDenied()) {
+	protected boolean isOverRetryTimes(WebContext context) {
+		if (null != getFailureCounter() && getFailureCounter().get(context, context.getSessionStore(), getRetryTimesKeyAttribute()) >= getRetryTimesWhenAccessDenied()) {
 			return true;
 		}
 		return false;

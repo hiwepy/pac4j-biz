@@ -20,8 +20,6 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.WebContextHelper;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.extractor.CredentialsExtractor;
 import org.pac4j.core.exception.CredentialsException;
@@ -60,14 +58,14 @@ public class SignatureParameterExtractor implements CredentialsExtractor {
 	}
 	
 	@Override
-    public Optional<Credentials> extract(WebContext context, SessionStore sessionStore) {
+    public Optional<Credentials> extract(WebContext context) {
 		
 		logger.debug("supportGetRequest: {}", this.supportGetRequest);
 		logger.debug("supportPostRequest: {}", this.supportPostRequest);
 		
-		if (WebContextHelper.isGet(context) && !supportGetRequest) {
+		if ("GET".equalsIgnoreCase(context.getRequestMethod()) && !supportGetRequest) {
             throw new CredentialsException("GET requests not supported");
-        } else if (WebContextHelper.isPost(context) && !supportPostRequest) {
+        } else if ("POST".equalsIgnoreCase(context.getRequestMethod()) && !supportPostRequest) {
             throw new CredentialsException("POST requests not supported");
         }
         

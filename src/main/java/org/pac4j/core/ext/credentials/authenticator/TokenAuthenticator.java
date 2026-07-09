@@ -26,7 +26,6 @@ import java.util.Optional;
 
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.TokenCredentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
@@ -72,13 +71,13 @@ public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token
 	}
 	
 	@Override
-    protected void internalInit(final boolean forceReinit) {
+    protected void internalInit() {
 		CommonHelper.assertNotNull("parameterName", parameterName);
 		CommonHelper.assertNotNull("profileDefinition", getProfileDefinition());
     }
 	
 	@Override
-    public void validate(Credentials credentials, WebContext context, SessionStore sessionStore) {
+    public void validate(Credentials credentials, WebContext context) {
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
