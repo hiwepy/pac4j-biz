@@ -8,7 +8,7 @@
 
 ``` xml
 <dependency>
-	<groupId>com.github.hiwepy</groupId>
+	<groupId>io.github.easy4j</groupId>
 	<artifactId>pac4j-biz</artifactId>
 	<version>${project.version}</version>
 </dependency>
