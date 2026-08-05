@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 
 public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token>
-	extends TokenProfileDefinitionAware<P, T>  implements Authenticator {
+	extends TokenProfileDefinitionAware<P, T>  implements Authenticator<TokenCredentials> {
 	
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0";
@@ -77,19 +77,18 @@ public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token
     }
 	
 	@Override
-    public void validate(Credentials credentials, WebContext context) {
+    public void validate(TokenCredentials credentials, WebContext context) {
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
         }
         
-    	TokenCredentials tokenCredentials = (org.pac4j.core.credentials.TokenCredentials) credentials;
-        String token = tokenCredentials.getToken();
+        String token = credentials.getToken();
         if (CommonHelper.isBlank(token)) {
             throw new CredentialsException("Token cannot be blank");
         }
         
-        final Optional<P> profile = retrieveUserProfileFromToken(context , tokenCredentials);
+        final Optional<P> profile = retrieveUserProfileFromToken(context , credentials);
         
         logger.debug("profile: {}", profile.get());
         credentials.setUserProfile(profile.get());
