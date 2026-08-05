@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
  */
 public abstract class SignatureAuthenticator<C extends SignatureCredentials, P extends SignatureProfile, T extends Signature>
-	extends SignatureProfileDefinitionAware<P, T>  implements Authenticator {
+	extends SignatureProfileDefinitionAware<P, T>  implements Authenticator<C> {
 	
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
     private String charset = StandardCharsets.UTF_8.name();
@@ -49,19 +49,18 @@ public abstract class SignatureAuthenticator<C extends SignatureCredentials, P e
     }
 	
 	@Override
-    public void validate(Credentials credentials, WebContext context) {
+    public void validate(C credentials, WebContext context) {
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
         }
         
-    	SignatureCredentials signatureCredentials = (SignatureCredentials) credentials;
-        String payload = signatureCredentials.getPayload();
+        String payload = credentials.getPayload();
         if (CommonHelper.isBlank(payload)) {
             throw new CredentialsException("Payload cannot be blank");
         }
 
-        final Optional<P> profile = Optional.of(getProfileDefinition().extractUserProfile(payload, signatureCredentials.getSignature()));
+        final Optional<P> profile = Optional.of(getProfileDefinition().extractUserProfile(payload, credentials.getSignature()));
         
         logger.debug("profile: {}", profile.get());
         credentials.setUserProfile(profile.get());
