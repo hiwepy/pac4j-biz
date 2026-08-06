@@ -1,25 +1,28 @@
 # pac4j-biz
 
-<div align="center">
-
-**基于 pac4j-core 的业务扩展：验证码表单登录、Token 与签名客户端、失败计数、授权器与回调 URL 解析器**
-
-![Java](https://img.shields.io/badge/Java-21-orange) ![License](https://img.shields.io/badge/license-Apache%202.0-green)
-
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
-[1. 项目概述](#1-project-overview) · [2. 能力与状态](#2-features--status) · [3. 运行要求与兼容性](#3-requirements--compatibility) · [4. 架构与模块](#4-architecture--modules) · [5. 引入依赖](#5-installation) · [6. 快速开始](#6-quick-start) · [7. 配置](#7-configuration) · [8. 核心用法](#8-core-usage) · [9. 测试与构建](#9-testing--build) · [10. 版本线与分支](#10-versioning--branches) · [11. 贡献与许可证](#11-contributing--license)
+基于 pac4j-core 的业务扩展：验证码表单登录、Token 与签名客户端、失败计数、授权器与回调 URL 解析器
 
-</div>
-
----
-
-> **当前分支**：`feature/3.0.x`<br>
-> **版本**：`3.0.x.x.20260630-SNAPSHOT`<br>
-> **JDK 基线**：8<br>
+> **当前分支**：`feature/3.0.x`
+> **版本**：`3.0.x.x.20260630-SNAPSHOT`
+> **JDK 基线**：8
 > **项目状态**：维护中（1.0.x 线）。尚未发布 Maven Central；制品通过 Aliyun Maven 仓库与 GitHub Releases 分发。
 
-<a id="1-project-overview"></a>
+## 目录
+
+- [1. 项目概述](#1-项目概述)
+- [2. 能力与状态](#2-features--status)
+- [3. 运行要求与兼容性](#3-requirements--compatibility)
+- [4. 架构与模块](#4-architecture--modules)
+- [5. 引入依赖](#5-installation)
+- [6. 快速开始](#6-quick-start)
+- [7. 配置](#7-configuration)
+- [8. 核心用法](#8-core-usage)
+- [9. 测试与构建](#9-testing--build)
+- [10. 版本线与分支](#10-versioning--branches)
+- [11. 贡献与许可证](#11-contributing--license)
+
 ## 1. 项目概述
 
 ### 1.1 是什么
