@@ -2,6 +2,8 @@
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
+[![Java](https://img.shields.io/badge/Java-21-orange)](https://github.com/easy-4-java/pac4j-biz) [![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE)
+
 基于 pac4j-core 的业务扩展：验证码表单登录、Token 与签名客户端、失败计数、授权器与回调 URL 解析器
 
 > **当前分支**：`feature/3.0.x`
