@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, hiwepy (https://github.com/hiwepy).
+ * Copyright (c) 2018, Loong Wan (https://github.com/loong10k).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,7 +20,6 @@ import java.util.Optional;
 import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
@@ -35,7 +34,7 @@ import org.pac4j.core.util.Pac4jConstants;
 
 /**
  * TODO
- * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
+ * @author [@Loong Wan](https://github.com/loong10k)
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class UsernamePasswordCaptchaFormClient extends IndirectClient {
@@ -81,23 +80,22 @@ public class UsernamePasswordCaptchaFormClient extends IndirectClient {
     }
 
     @Override
-    protected void internalInit(final boolean forceReinit) {
+    protected void clientInit() {
         CommonHelper.assertNotBlank("loginUrl", this.loginUrl);
         CommonHelper.assertNotBlank("usernameParameter", this.usernameParameter);
         CommonHelper.assertNotBlank("passwordParameter", this.passwordParameter);
         CommonHelper.assertNotBlank("captchaParameter", this.captchaParameter);
         
-        defaultRedirectionActionBuilder((context, sessionStore) -> {
+        defaultRedirectionActionBuilder(context -> {
             final String finalLoginUrl = getUrlResolver().compute(this.loginUrl, context);
-            //return RedirectionAction.redirect(finalLoginUrl);
-            return null;
+            return Optional.of(new FoundAction(finalLoginUrl));
         });
         
         defaultCredentialsExtractor(new UsernamePasswordCaptchaCredentialsExtractor(usernameParameter, passwordParameter, captchaParameter, postOnly));
     }
 
     @Override
-    protected Optional<Credentials> retrieveCredentials(final WebContext context, SessionStore sessionStore) {
+    protected Optional<Credentials> retrieveCredentials(final WebContext context) {
         CommonHelper.assertNotNull("credentialsExtractor", getCredentialsExtractor());
         CommonHelper.assertNotNull("authenticator", getAuthenticator());
 
@@ -105,24 +103,24 @@ public class UsernamePasswordCaptchaFormClient extends IndirectClient {
         Optional<Credentials> credentials;
         try {
             // retrieve credentials
-            credentials = getCredentialsExtractor().extract(context, sessionStore);
+            credentials = getCredentialsExtractor().extract(context);
             logger.debug("usernamePasswordCredentials: {}", credentials);
             if (credentials == null) {
-                throw handleInvalidCredentials(context, sessionStore, username, "Username and password cannot be blank -> return to the form with error",
+                throw handleInvalidCredentials(context, username, "Username and password cannot be blank -> return to the form with error",
                     MISSING_FIELD_ERROR);
             }
             // validate credentials
-            getAuthenticator().validate(credentials.get(), context, sessionStore);
+            getAuthenticator().validate(credentials.get(), context);
         } catch (final CredentialsException e) {
-            throw handleInvalidCredentials(context, sessionStore, username, "Credentials validation fails -> return to the form with error",
+            throw handleInvalidCredentials(context, username, "Credentials validation fails -> return to the form with error",
                 computeErrorMessage(e));
         }
         return credentials;
     }
 
-    protected HttpAction handleInvalidCredentials(final WebContext context, SessionStore sessionStore, final Optional<String> username, String message, String errorMessage) {
+    protected HttpAction handleInvalidCredentials(final WebContext context, final Optional<String> username, String message, String errorMessage) {
         // it's an AJAX request -> unauthorized (instead of a redirection)
-        if (getAjaxRequestResolver().isAjax(context, sessionStore)) {
+        if (getAjaxRequestResolver().isAjax(context)) {
             logger.info("AJAX request detected -> returning 401");
             return new StatusAction(HttpConstants.UNAUTHORIZED);
         } else {

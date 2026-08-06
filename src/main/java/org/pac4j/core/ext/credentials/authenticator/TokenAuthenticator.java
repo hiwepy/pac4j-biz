@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, hiwepy (https://github.com/hiwepy).
+ * Copyright (c) 2018, Loong Wan (https://github.com/loong10k).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,7 +26,6 @@ import java.util.Optional;
 
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.TokenCredentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
@@ -46,7 +45,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 
 public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token>
-	extends TokenProfileDefinitionAware<P, T>  implements Authenticator {
+	extends TokenProfileDefinitionAware<P, T>  implements Authenticator<TokenCredentials> {
 	
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0";
@@ -72,25 +71,24 @@ public abstract class TokenAuthenticator<P extends TokenProfile, T extends Token
 	}
 	
 	@Override
-    protected void internalInit(final boolean forceReinit) {
+    protected void internalInit() {
 		CommonHelper.assertNotNull("parameterName", parameterName);
 		CommonHelper.assertNotNull("profileDefinition", getProfileDefinition());
     }
 	
 	@Override
-    public void validate(Credentials credentials, WebContext context, SessionStore sessionStore) {
+    public void validate(TokenCredentials credentials, WebContext context) {
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
         }
         
-    	TokenCredentials tokenCredentials = (org.pac4j.core.credentials.TokenCredentials) credentials;
-        String token = tokenCredentials.getToken();
+        String token = credentials.getToken();
         if (CommonHelper.isBlank(token)) {
             throw new CredentialsException("Token cannot be blank");
         }
         
-        final Optional<P> profile = retrieveUserProfileFromToken(context , tokenCredentials);
+        final Optional<P> profile = retrieveUserProfileFromToken(context , credentials);
         
         logger.debug("profile: {}", profile.get());
         credentials.setUserProfile(profile.get());

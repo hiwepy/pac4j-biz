@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, hiwepy (https://github.com/hiwepy).
+ * Copyright (c) 2018, Loong Wan (https://github.com/loong10k).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,14 +19,13 @@ import java.util.Optional;
 
 import org.pac4j.core.authorization.generator.AuthorizationGenerator;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.ext.authentication.userdetails.UserDetailsService;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.UserProfile;
 
 /**
  * TODO
- * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
+ * @author [@Loong Wan](https://github.com/loong10k)
  */
 public class UserDetailsAuthorizationGenerator<U extends CommonProfile> implements AuthorizationGenerator {
 
@@ -38,7 +37,7 @@ public class UserDetailsAuthorizationGenerator<U extends CommonProfile> implemen
 	}
 	
 	@Override
-    public Optional<UserProfile> generate(WebContext context, SessionStore sessionStore, UserProfile profile) {
+    public Optional<UserProfile> generate(WebContext context, UserProfile profile) {
 		UserDetails details = getDetailsService().loadUserDetails(context, profile);
         profile.addPermissions(details.getPermissions());
         profile.addRoles(details.getRoles());

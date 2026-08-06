@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, hiwepy (https://github.com/hiwepy).
+ * Copyright (c) 2018, Loong Wan (https://github.com/loong10k).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.exception.CredentialsException;
@@ -33,10 +32,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * TODO
- * @author 		： <a href="https://github.com/hiwepy">hiwepy</a>
+ * @author [@Loong Wan](https://github.com/loong10k)
  */
 public abstract class SignatureAuthenticator<C extends SignatureCredentials, P extends SignatureProfile, T extends Signature>
-	extends SignatureProfileDefinitionAware<P, T>  implements Authenticator {
+	extends SignatureProfileDefinitionAware<P, T>  implements Authenticator<C> {
 	
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
     private String charset = StandardCharsets.UTF_8.name();
@@ -45,24 +44,23 @@ public abstract class SignatureAuthenticator<C extends SignatureCredentials, P e
 	}
 	
 	@Override
-    protected void internalInit(final boolean forceReinit) {
+    protected void internalInit() {
 		CommonHelper.assertNotNull("profileDefinition", getProfileDefinition());
     }
 	
 	@Override
-    public void validate(Credentials credentials, WebContext context, SessionStore sessionStore) {
+    public void validate(C credentials, WebContext context) {
         
     	if (credentials == null) {
             throw new CredentialsException("No credential");
         }
         
-    	SignatureCredentials signatureCredentials = (SignatureCredentials) credentials;
-        String payload = signatureCredentials.getPayload();
+        String payload = credentials.getPayload();
         if (CommonHelper.isBlank(payload)) {
             throw new CredentialsException("Payload cannot be blank");
         }
 
-        final Optional<P> profile = Optional.of(getProfileDefinition().extractUserProfile(payload, signatureCredentials.getSignature()));
+        final Optional<P> profile = Optional.of(getProfileDefinition().extractUserProfile(payload, credentials.getSignature()));
         
         logger.debug("profile: {}", profile.get());
         credentials.setUserProfile(profile.get());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, hiwepy (https://github.com/hiwepy).
+ * Copyright (c) 2018, Loong Wan (https://github.com/loong10k).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,21 +18,20 @@ package org.pac4j.core.ext.profile.creator;
 import java.util.Optional;
 
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.profile.creator.ProfileCreator;
 
 /**
  * Signature profile creator.
- * @author 		： <a href="https://github.com/hiwepy">wandl</a>
+ * @author [@Loong Wan](https://github.com/loong10k)
  */
 public class SignatureProfileCreator implements ProfileCreator {
 
 	public final static SignatureProfileCreator INSTANCE = new SignatureProfileCreator();
 
     @Override
-    public Optional<UserProfile> create(Credentials credentials, WebContext context, SessionStore sessionStore) {
+    public Optional<UserProfile> create(Credentials credentials, WebContext context) {
         return Optional.ofNullable(credentials.getUserProfile());
     }
 }
